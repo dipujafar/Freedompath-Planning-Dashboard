@@ -36,6 +36,9 @@ const antTheme = {
     Form: {
       labelFontSize: 18,
     },
+    Tabs: {
+      itemSelectedColor: "#467BAB",
+    },
   },
 };
 

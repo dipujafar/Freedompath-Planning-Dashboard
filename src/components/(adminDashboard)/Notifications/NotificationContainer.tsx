@@ -38,7 +38,7 @@ const NotificationContainer = () => {
             {notificationData?.map((notification, index) => (
               <div className="flex items-center gap-x-4">
                 <div className="bg-main-color size-10 flex justify-center items-center rounded-full cursor-pointer">
-                  <Bell color="white"/>
+                  <Bell color="white" />
                 </div>
                 <div
                   key={index}
@@ -60,25 +60,6 @@ const NotificationContainer = () => {
             ))}
           </div>
         </div>
-
-        {/* <div className="mt-5 grid grid-cols-1 gap-8">
-          {currentNotifications.map((notification, inx) => (
-            <div key={inx} className="flex gap-4 items-center">
-              <div className="bg-[#FFFFFF] p-2 rounded">
-                <MdOutlineNotificationsNone
-                  size={28}
-                  color="var(--color-main)"
-                />
-              </div>
-              <div className=" text-text-color">
-                <h4 className="text-lg font-medium ">
-                  {notification.message} from {notification?.name}
-                </h4>
-                <p>{notification.time}</p>
-              </div>
-            </div>
-          ))}
-        </div> */}
       </div>
       {/* pagination */}
       {/* <div className="w-max mt-3 ml-auto">

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const verifyEmail = () => {
-  return <OtpVerificationForm />;
+  return <div> <OtpVerificationForm /> </div>;
 };
 
 export default verifyEmail;

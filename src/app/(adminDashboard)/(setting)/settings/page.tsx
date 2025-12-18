@@ -1,9 +1,22 @@
-import SettingContainer from '@/components/(adminDashboard)/(setting)/SettingContainer';
-import React from 'react';
+import PrivacyPolicyEditor from '@/components/(adminDashboard)/(setting)/privacyPolicy/PrivacyPolicyEditor';
+import TermsConditionsEditor from '@/components/(adminDashboard)/(setting)/TermsConditions/TermsConditionsEditor';
+import { Tabs } from 'antd';
+const items = [
+    {
+        key: '1',
+        label: 'Privacy Policy',
+        children: <PrivacyPolicyEditor />,
+    },
+    {
+        key: '2',
+        label: 'Terms and Conditions',
+        children: <TermsConditionsEditor />,
+    }
+];
 
 const SettingsPage = () => {
     return (
-        <SettingContainer></SettingContainer>
+        <Tabs defaultActiveKey="1" items={items} />
     );
 };
 

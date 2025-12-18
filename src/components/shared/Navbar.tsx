@@ -3,7 +3,6 @@ import { Avatar, Badge, Flex } from "antd";
 import { FaBars } from "react-icons/fa6";
 import { IoNotificationsOutline } from "react-icons/io5";
 import avatarImg from "@/assets/image/user_image.png";
-
 import Link from "next/link";
 import { ChevronRight, X } from "lucide-react";
 import {
@@ -89,7 +88,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                 </MenubarItem>
               </Link>
               <MenubarSeparator />
-              <Link href={"/login"}>
+              <Link href={"#"}>
                 <MenubarItem className="hover:bg-gray-100 cursor-pointer">
                   Logout
                 </MenubarItem>

@@ -31,16 +31,10 @@ const PrivacyPolicyEditor = () => {
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <span
-          onClick={() => route.back()}
-          className="cursor-pointer bg-main-color p-2 rounded-full"
-        >
-          <FaArrowLeft size={20} color="#fff" />
-        </span>
+      <div className="flex items-center gap-2 mt-5">
         <h4 className="text-2xl font-medium text-text-color">Privacy Policy</h4>
       </div>
-      <div className="lg:mt-10 mt-5 border rounded p-2">
+      <div className="mt-5 border rounded p-2">
         <ReactQuill
           modules={moduleConest}
           theme="snow"

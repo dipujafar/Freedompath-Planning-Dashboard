@@ -1,10 +1,10 @@
 import { RiDashboardHorizontalFill } from "react-icons/ri";
 import { IoSettingsOutline } from "react-icons/io5";
 import Link from "next/link";
-import { BookAudio, CalendarDays, CirclePlus, GitPullRequestCreateArrow } from "lucide-react";
-import { BiSupport } from "react-icons/bi";
+import { BookAudio, BookmarkCheck, BookOpenText, FileDown, NotebookText, UsersRound } from "lucide-react";
 import { TbShoppingBagMinus } from "react-icons/tb";
 import { FaRegStarHalfStroke } from "react-icons/fa6";
+import { BsImageFill } from "react-icons/bs";
 
 
 export const navLinks = [
@@ -19,6 +19,17 @@ export const navLinks = [
     label: <Link href={"/service-management"}>Service  Management</Link>,
   },
   {
+    key: "about-us-management",
+    icon: <NotebookText size={18} />,
+    label: <Link href={"/about-management"}>About us Management</Link>,
+  },
+  {
+    key: "associates-management",
+    icon: <UsersRound size={18} />,
+    label: <Link href={"/associates-management"}>Associates Management</Link>,
+  },
+
+  {
     key: "testimonial-management",
     icon: <FaRegStarHalfStroke size={18} />,
     label: <Link href={"/testimonial-management"}>Testimonial Management</Link>,
@@ -29,19 +40,24 @@ export const navLinks = [
     label: <Link href={"/resources-management"}>Resources Management</Link>,
   },
   {
-    key: "add-gyms",
-    icon: <CirclePlus size={18} />,
-    label: <Link href={"/add-gyms"}>Add Gyms</Link>,
+    key: "ebook-download",
+    icon: <FileDown size={18} />,
+    label: <Link href={"/ebook-download"}>Ebook Download</Link>,
   },
   {
-    key: "add-events",
-    icon: <CalendarDays size={18} />,
-    label: <Link href={"/add-events"}>Add Events</Link>,
+    key: "book-management",
+    icon: <BookOpenText size={18} />,
+    label: <Link href={"/book-management"}>Book Management</Link>,
   },
   {
-    key: "contact-support",
-    icon: <BiSupport size={18} />,
-    label: <Link href={"/contact-support"}>Contact Support</Link>,
+    key: "blog-management",
+    icon: <BsImageFill size={18} />,
+    label: <Link href={"/blog-management"}>Blog Management</Link>,
+  },
+  {
+    key: "reports-management",
+    icon: <BookmarkCheck size={18} />,
+    label: <Link href={"/reports-management"}>Reports Management</Link>,
   },
   {
     key: "settings",

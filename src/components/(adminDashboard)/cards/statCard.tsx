@@ -1,5 +1,3 @@
-import { cn } from "@/lib/utils";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import React from "react";
 
 type TProps = {

@@ -97,7 +97,7 @@ export function AddTestimonialForm() {
                 <FormItem>
                   <FormLabel>Client Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter" {...field} />
+                    <Input placeholder="Enter Client Name" {...field} className="border border-[#E1E1E1] bg-[#F9FAFB] py-5" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -111,7 +111,7 @@ export function AddTestimonialForm() {
                 <FormItem>
                   <FormLabel>Designation</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter" {...field} />
+                    <Input placeholder="Enter Client Designation" {...field} className="border border-[#E1E1E1] bg-[#F9FAFB] py-5" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -126,7 +126,7 @@ export function AddTestimonialForm() {
                   <FormLabel>Client Photo</FormLabel>
                   <FormControl>
                     <div
-                      className="relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30 transition-colors hover:bg-muted/50"
+                      className="relative flex min-h-[200px] cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed  border-[#E1E1E1] bg-[#F9FAFB]  transition-colors hover:bg-muted/50"
                       onDragOver={handleDragOver}
                       onDrop={handleDrop}
                       onClick={() => document.getElementById("file-upload")?.click()}
@@ -168,9 +168,9 @@ export function AddTestimonialForm() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Comment</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Enter" className="min-h-[120px] resize-none" {...field} />
+                    <Textarea placeholder="Enter the comment which client says " className="min-h-[120px] resize-none border border-[#E1E1E1] bg-[#F9FAFB] " {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -195,11 +195,10 @@ export function AddTestimonialForm() {
                           className="transition-transform hover:scale-110"
                         >
                           <Star
-                            className={`h-6 w-6 ${
-                              star <= (hoveredStar || currentRating)
-                                ? "fill-yellow-400 text-yellow-400"
+                            className={`h-6 w-6 ${star <= (hoveredStar || currentRating)
+                                ? "fill-[#3673DE] text-[#3673DE]"
                                 : "fill-none text-muted-foreground"
-                            }`}
+                              }`}
                           />
                         </button>
                       ))}
@@ -210,7 +209,7 @@ export function AddTestimonialForm() {
               )}
             />
 
-            <Button type="submit" className="w-full bg-foreground text-background hover:bg-foreground/90">
+            <Button type="submit" className="w-full bg-main-color text-background hover:bg-foreground/90 py-5">
               Save
             </Button>
           </form>

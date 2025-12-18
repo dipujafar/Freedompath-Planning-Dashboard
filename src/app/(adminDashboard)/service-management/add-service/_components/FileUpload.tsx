@@ -59,12 +59,12 @@ export function FileUpload({ onFileChange }: FileUploadProps) {
       onClick={handleClick}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className="relative flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-background transition-colors hover:border-muted-foreground/50 hover:bg-accent/50  border-[#E1E1E1] bg-[#F9FAFB] py-5"
+      className="relative flex h-48 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-border  transition-colors hover:border-muted-foreground/50 hover:bg-accent/50   border-[#E1E1E1] bg-[#F9FAFB]"
     >
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
       {preview ? (
         <>
-          <img src={preview || "/placeholder.svg"} alt="Preview" className="h-full w-full rounded-lg object-cover" />
+          <img src={preview || "/placeholder.svg"} alt="Preview" className="rounded-lg w-[180px] h-[180px] object-cover" />
           <Button
             type="button"
             variant="destructive"

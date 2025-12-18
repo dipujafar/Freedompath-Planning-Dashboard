@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const ResetPassword = () => {
-  return <ResetPasswordForm />;
+  return <div> <ResetPasswordForm /> </div>;
 };
 
 export default ResetPassword;

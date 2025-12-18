@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 const LoginPage = () => {
-  return <LoginForm />;
+  return <div> <LoginForm /></div>;
 };
 
 export default LoginPage;

@@ -1,44 +1,42 @@
 "use client";;
-import { Image, TableProps } from "antd";
+import { TableProps } from "antd";
 import DataTable from "@/utils/DataTable";
 import { Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
+import resourceImage from "@/assets/image/resources_image.png";
+import Image from "next/image";
+import Link from "next/link";
 
 type TDataType = {
     key?: number;
     serial: number;
     name: string;
     subtitle: string;
+    link: string;
     date: string;
 };
 
 const data: TDataType[] = Array.from({ length: 8 }).map((_, inx) => ({
     key: inx,
     serial: inx + 1,
-    name: "CPA/Exit Planning",
-    subtitle: "Strategic roadmap to maximize value and ensure successful business transition.",
-    phoneNumber: "+9112655423",
-    type: "User",
+    name: "Investment Calculator",
+    subtitle: "Calculate potential returns on your gaps investment portfolio with ",
+    link: "#",
     date: "11 Sep, 2025",
 }));
 
 
 
-const ServiceManagementTable = () => {
+const ToolResources = () => {
     const router = useRouter();
 
     const columns: TableProps<TDataType>["columns"] = [
         {
-            title: "Image",
-            dataIndex: "image",
-            render: () => <Image src={"/service_image.jpg"} alt="service" width={60} height={60} className="object-cover rounded-2xl" />,
-        },
-        {
-            title: "Service Name",
+            title: "Tool Name",
             dataIndex: "name",
         },
         {
-            title: "Service Sub Title",
+            title: "Sub Title",
             dataIndex: "subtitle",
             render: (text) => <p className="max-w-[400px]">{text}</p>,
         },
@@ -46,12 +44,20 @@ const ServiceManagementTable = () => {
             title: "Listing Date",
             dataIndex: "date",
         },
+        {
+            title: "Resource Link",
+            dataIndex: "date",
+            align: "center",
+            render: (_, record) => <Link href={record.link} className="flex-center cursor-pointer">
+                <Image src={resourceImage} alt="service" width={25} height={25} className="object-cover rounded-2xl" />,
+            </Link>
+        },
 
         {
             title: "Action",
             dataIndex: "action",
             render: (_, record) => (
-                <Eye size={22} color="#78C0A8" onClick={() => router.push(`/service-management/add-service`)} className="cursor-pointer" />
+                <Eye size={22} color="#78C0A8" onClick={() => router.push(`/testimonial-management/add-testimonial`)} className="cursor-pointer" />
             ),
         },
     ];
@@ -61,4 +67,4 @@ const ServiceManagementTable = () => {
     );
 };
 
-export default ServiceManagementTable;
+export default ToolResources;
