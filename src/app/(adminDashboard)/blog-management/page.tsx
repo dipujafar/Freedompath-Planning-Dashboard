@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { PlusIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
-import BlogManagementContainer from './BlogManagementContainer'
+import BlogManagementContainer from './_components/BlogManagementContainer'
 
 export default function Blog() {
     return (

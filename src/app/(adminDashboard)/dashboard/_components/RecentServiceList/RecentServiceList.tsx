@@ -2,7 +2,7 @@
 import { Image, TableProps } from "antd";
 import { useState } from "react";
 import DataTable from "@/utils/DataTable";
-import { Eye } from "lucide-react";
+import { Eye, Link } from "lucide-react";
 
 type TDataType = {
   key?: number;
@@ -52,7 +52,9 @@ const RecentServiceList = () => {
       dataIndex: "action",
       render: (_, record) => (
         <div className="flex items-center gap-x-1">
-          <Eye size={22} color="#78C0A8" onClick={() => setOpen(!open)} />
+          <Link href={`/service-management/${record.key}`}>
+            <Eye size={22} color="#78C0A8" onClick={() => setOpen(!open)} />
+          </Link>
         </div>
       ),
     },
