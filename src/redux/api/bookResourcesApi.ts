@@ -40,10 +40,39 @@ const bookResourcesApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, id) => [{ type: tagTypes.bookResources, id }],
         }),
+
+        // Create new book resource
+        createBookResource: build.mutation<ISingleBookResourceResponse, FormData>({
+            query: (formData) => ({
+                url: "/book-resources",
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: [tagTypes.bookResources],
+        }),
+
+        // Update book resource
+        updateBookResource: build.mutation<
+            ISingleBookResourceResponse,
+            { id: string; formData: FormData }
+        >({
+            query: ({ id, formData }) => ({
+                url: `/book-resources/${id}`,
+                method: "PATCH",
+                body: formData,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                tagTypes.bookResources,
+                { type: tagTypes.bookResources, id },
+            ],
+        }),
     }),
 });
 
 export const {
     useGetBookResourcesQuery,
     useGetSingleBookResourceQuery,
+    useCreateBookResourceMutation,
+    useUpdateBookResourceMutation,
 } = bookResourcesApi;
+

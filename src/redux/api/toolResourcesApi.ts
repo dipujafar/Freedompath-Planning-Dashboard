@@ -6,6 +6,13 @@ import {
 import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
 
+// Type for creating/updating tool resource
+interface IToolResourcePayload {
+    name: string;
+    details: string;
+    link: string;
+}
+
 const toolResourcesApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         // Get all tool resources with pagination and search
@@ -40,10 +47,39 @@ const toolResourcesApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, id) => [{ type: tagTypes.toolResources, id }],
         }),
+
+        // Create new tool resource
+        createToolResource: build.mutation<ISingleToolResourceResponse, IToolResourcePayload>({
+            query: (body) => ({
+                url: "/tool-resource",
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: [tagTypes.toolResources],
+        }),
+
+        // Update tool resource
+        updateToolResource: build.mutation<
+            ISingleToolResourceResponse,
+            { id: string; body: IToolResourcePayload }
+        >({
+            query: ({ id, body }) => ({
+                url: `/tool-resource/${id}`,
+                method: "PATCH",
+                body,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                tagTypes.toolResources,
+                { type: tagTypes.toolResources, id },
+            ],
+        }),
     }),
 });
 
 export const {
     useGetToolResourcesQuery,
     useGetSingleToolResourceQuery,
+    useCreateToolResourceMutation,
+    useUpdateToolResourceMutation,
 } = toolResourcesApi;
+
