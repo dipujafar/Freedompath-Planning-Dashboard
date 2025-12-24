@@ -1,6 +1,7 @@
 import {
     IAssociateQueryParams,
     IAssociatesResponse,
+    ISingleAssociateResponse,
 } from "@/types/associate.types";
 import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
@@ -30,7 +31,17 @@ const associatesApi = baseApi.injectEndpoints({
             },
             providesTags: [tagTypes.associates],
         }),
+
+        // Get single associate by ID
+        getSingleAssociate: build.query<ISingleAssociateResponse, string>({
+            query: (id) => ({
+                url: `/associates/${id}`,
+                method: "GET",
+            }),
+            providesTags: (result, error, id) => [{ type: tagTypes.associates, id }],
+        }),
     }),
 });
 
-export const { useGetAssociatesQuery } = associatesApi;
+export const { useGetAssociatesQuery, useGetSingleAssociateQuery } = associatesApi;
+

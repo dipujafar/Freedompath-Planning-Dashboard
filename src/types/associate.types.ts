@@ -25,6 +25,12 @@ export interface IAssociatesResponse {
     };
 }
 
+export interface ISingleAssociateResponse {
+    success: boolean;
+    message: string;
+    data: IAssociate;
+}
+
 export interface IAssociateQueryParams {
     page?: number;
     limit?: number;
