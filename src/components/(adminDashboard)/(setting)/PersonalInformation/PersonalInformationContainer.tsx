@@ -1,38 +1,114 @@
 "use client";
-import { Button, ConfigProvider, Form, Input } from "antd";
+
+import { Button, ConfigProvider, Form, Input, Spin } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa6";
 import { FiEdit } from "react-icons/fi";
 import profile from "@/assets/image/adminProfile.png";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Camera, Trash2, X } from "lucide-react";
+import { Camera, Loader2, Trash2 } from "lucide-react";
+import {
+  useGetMyProfileQuery,
+  useUpdateMyProfileMutation,
+} from "@/redux/api/profileApi";
+import { useAppDispatch } from "@/redux/hooks";
+import { setUser } from "@/redux/features/authSlice";
+import Cookies from "js-cookie";
 
 const PersonalInformationContainer = () => {
   const route = useRouter();
+  const dispatch = useAppDispatch();
   const [form] = Form.useForm();
   const [edit, setEdit] = useState(false);
   const [fileName, setFileName] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [existingImage, setExistingImage] = useState<string | null>(null);
 
-  // @ts-expect-error: Ignoring TypeScript error due to inferred 'any' type for 'values' which is handled in the form submit logic
-  const handleSubmit = (values) => {
-    toast.success("Successfully Change personal information", {
-      duration: 1000,
-    });
-    setEdit(false);
+  const { data: profileData, isLoading: isFetching } = useGetMyProfileQuery();
+  const [updateMyProfile, { isLoading: isUpdating }] =
+    useUpdateMyProfileMutation();
+
+  // Populate form with existing data
+  useEffect(() => {
+    if (profileData?.data) {
+      const userData = profileData.data;
+      form.setFieldsValue({
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phoneNumber || "",
+      });
+      if (userData.profile) {
+        setExistingImage(userData.profile);
+      }
+    }
+  }, [profileData, form]);
+
+  const handleSubmit = async (values: { name: string; phone: string }) => {
+    const formData = new FormData();
+
+    const jsonData = {
+      name: values.name,
+      phoneNumber: values.phone,
+    };
+
+    formData.append("data", JSON.stringify(jsonData));
+
+    if (fileName) {
+      formData.append("image", fileName);
+    }
+
+    try {
+      const result = await updateMyProfile(formData).unwrap();
+
+      if (result.success) {
+        toast.success("Profile updated successfully!");
+        setEdit(false);
+
+        // Update Redux state with new user data
+        const token = Cookies.get("famsched-access-token");
+        if (token && result.data) {
+          dispatch(
+            setUser({
+              user: {
+                id: result.data.id,
+                name: result.data.name,
+                email: result.data.email,
+                status: result.data.status,
+                role: result.data.role,
+                profile: result.data.profile,
+                phoneNumber: result.data.phoneNumber,
+                customerId: null,
+                expireAt: null,
+                isDeleted: false,
+                createdAt: result.data.createdAt,
+                updatedAt: new Date().toISOString(),
+                verification: result.data.verification,
+              },
+              token,
+            })
+          );
+        }
+
+        // Update existing image if new one was uploaded
+        if (fileName && imageUrl) {
+          setExistingImage(imageUrl);
+          setFileName(null);
+          setImageUrl(null);
+        }
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to update profile");
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const input = event.target;
-
     const file = input.files?.[0];
-    console.log(file);
 
     if (file) {
       const url = URL.createObjectURL(file);
-      console.log(url);
       setImageUrl(url);
       setFileName(file);
     } else {
@@ -42,6 +118,36 @@ const PersonalInformationContainer = () => {
 
     input.value = "";
   };
+
+  const handleCancelEdit = () => {
+    setEdit(false);
+    setFileName(null);
+    setImageUrl(null);
+    // Reset form to original values
+    if (profileData?.data) {
+      form.setFieldsValue({
+        name: profileData.data.name,
+        email: profileData.data.email,
+        phone: profileData.data.phoneNumber || "",
+      });
+    }
+  };
+
+  // Get initials for avatar placeholder
+  const getInitials = (name: string) => {
+    return name?.charAt(0)?.toUpperCase() || "U";
+  };
+
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  const userData = profileData?.data;
+  const displayImage = imageUrl || existingImage;
 
   return (
     <div>
@@ -62,7 +168,7 @@ const PersonalInformationContainer = () => {
             style={{
               backgroundColor: "var(--color-main)",
               border: "none",
-              color: "var(--color-secondary)", 
+              color: "var(--color-secondary)",
             }}
             onClick={() => setEdit(true)}
             size="large"
@@ -71,23 +177,44 @@ const PersonalInformationContainer = () => {
             Edit Profile
           </Button>
         </div>
+        {edit && (
+          <Button
+            style={{
+              backgroundColor: "#f5f5f5",
+              border: "1px solid #ddd",
+            }}
+            onClick={handleCancelEdit}
+            size="large"
+          >
+            Cancel
+          </Button>
+        )}
       </div>
       <hr className="my-4" />
 
       {/* personal information */}
-      <div className="mt-10 flex justify-center flex-col xl:flex-row items-center  gap-10">
-        <div className="bg-[#fff] h-[365px] md:w-[350px] rounded-xl border border-main-color flex justify-center items-center  text-text-color">
+      <div className="mt-10 flex justify-center flex-col xl:flex-row items-center gap-10">
+        <div className="bg-[#fff] h-[365px] md:w-[350px] rounded-xl border border-main-color flex justify-center items-center text-text-color">
           <div className="space-y-1 relative">
             <div className="relative group">
-              <Image
-                src={imageUrl || profile}
-                alt="adminProfile"
-                width={1200}
-                height={1200}
-                className="size-36 rounded-full flex justify-center items-center"
-              ></Image>
+              {displayImage ? (
+                <Image
+                  src={displayImage}
+                  alt="Profile"
+                  width={1200}
+                  height={1200}
+                  className="size-36 rounded-full flex justify-center items-center object-cover"
+                />
+              ) : (
+                <div
+                  className="size-36 rounded-full flex justify-center items-center text-white text-5xl font-bold"
+                  style={{ backgroundColor: "var(--color-main)" }}
+                >
+                  {getInitials(userData?.name || "U")}
+                </div>
+              )}
 
-              {/* cancel button */}
+              {/* cancel button for new image */}
               {fileName && imageUrl && (
                 <div
                   className="absolute left-4 top-2 cursor-pointer rounded-md bg-primary-pink opacity-0 duration-1000 group-hover:opacity-100"
@@ -99,27 +226,35 @@ const PersonalInformationContainer = () => {
                   <Trash2 size={20} color="red" />
                 </div>
               )}
-              {/* upload image */}
-              <input
-                type="file"
-                id="fileInput"
-                className="hidden"
-                onChange={handleFileChange}
-                accept="image/*"
-              />
-              {/* upload button */}
-              <label
-                htmlFor="fileInput"
-                className="flex cursor-pointer flex-col items-center"
-              >
-                <div className="bg-white text-black text-lg p-1 rounded-full  absolute bottom-0 right-3">
-                  <Camera size={20} />
-                </div>
-              </label>
+
+              {/* upload image - only in edit mode */}
+              {edit && (
+                <>
+                  <input
+                    type="file"
+                    id="fileInput"
+                    className="hidden"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                  />
+                  <label
+                    htmlFor="fileInput"
+                    className="flex cursor-pointer flex-col items-center"
+                  >
+                    <div className="bg-white text-black text-lg p-1 rounded-full absolute bottom-0 right-3 shadow-md hover:bg-gray-100 transition-colors">
+                      <Camera size={20} />
+                    </div>
+                  </label>
+                </>
+              )}
             </div>
-            <h3 className="text-2xl text-center">Admin</h3>
+            <h3 className="text-2xl text-center">{userData?.name || "Admin"}</h3>
+            <p className="text-sm text-center text-muted-foreground">
+              {userData?.role || "admin"}
+            </p>
           </div>
         </div>
+
         {/* form */}
         <div className="w-2/4">
           <ConfigProvider
@@ -128,7 +263,7 @@ const PersonalInformationContainer = () => {
                 Input: {
                   colorBgContainer: "#fff",
                   colorText: "#333",
-                  colorTextPlaceholder: "#fff",
+                  colorTextPlaceholder: "#999",
                 },
                 Form: {
                   labelColor: "#333",
@@ -143,49 +278,49 @@ const PersonalInformationContainer = () => {
               style={{
                 marginTop: "25px",
               }}
-              initialValues={{
-                name: "James Tracy",
-                email: "enrique@gmail.com",
-                phone: "3000597212",
-              }}
             >
               {/*  input  name */}
-              <Form.Item label="Name" name="name">
-                {edit ? (
-                  <Input size="large" placeholder="Enter full name "></Input>
-                ) : (
-                  <Input
-                    size="large"
-                    placeholder="Enter full name "
-                    readOnly
-                  ></Input>
-                )}
+              <Form.Item
+                label="Name"
+                name="name"
+                rules={[{ required: true, message: "Please enter your name" }]}
+              >
+                <Input
+                  size="large"
+                  placeholder="Enter full name"
+                  readOnly={!edit}
+                  style={{
+                    backgroundColor: edit ? "#fff" : "#f5f5f5",
+                  }}
+                />
               </Form.Item>
 
-              {/*  input  email */}
+              {/*  input  email - always readonly */}
               <Form.Item label="Email" name="email">
-                {edit ? (
-                  <Input size="large" placeholder="Enter email "></Input>
-                ) : (
-                  <Input
-                    size="large"
-                    placeholder="Enter email"
-                    readOnly
-                  ></Input>
-                )}
+                <Input
+                  size="large"
+                  placeholder="Enter email"
+                  readOnly
+                  style={{ backgroundColor: "#f5f5f5" }}
+                />
               </Form.Item>
 
               {/* input  phone number  */}
-              <Form.Item label="Phone Number" name="phone">
-                {edit ? (
-                  <Input size="large" placeholder="Enter Phone number"></Input>
-                ) : (
-                  <Input
-                    size="large"
-                    placeholder="Enter Phone number"
-                    readOnly
-                  ></Input>
-                )}
+              <Form.Item
+                label="Phone Number"
+                name="phone"
+                rules={[
+                  { required: true, message: "Please enter your phone number" },
+                ]}
+              >
+                <Input
+                  size="large"
+                  placeholder="Enter Phone number"
+                  readOnly={!edit}
+                  style={{
+                    backgroundColor: edit ? "#fff" : "#f5f5f5",
+                  }}
+                />
               </Form.Item>
 
               <div className={edit ? "" : "hidden"}>
@@ -193,9 +328,21 @@ const PersonalInformationContainer = () => {
                   htmlType="submit"
                   size="large"
                   block
-                  style={{ border: "none" }}
+                  disabled={isUpdating}
+                  style={{
+                    border: "none",
+                    backgroundColor: "var(--color-main)",
+                    color: "#fff",
+                  }}
                 >
-                  Save Change
+                  {isUpdating ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </span>
+                  ) : (
+                    "Save Changes"
+                  )}
                 </Button>
               </div>
             </Form>
