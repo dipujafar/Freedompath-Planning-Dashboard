@@ -1,113 +1,165 @@
-import { Eye, EyeOff, SquarePen, Trash2 } from 'lucide-react';
-import Image from 'next/image';
-import React from 'react'
+"use client";
 
-export const blogPosts = [
-    {
-        id: 1,
-        title: "Most popular design systems to learn from in 2022",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 2,
-        title: "Understanding accessibility makes you a better",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 3,
-        title: "15 best tools that will help you build your website",
-        tag: "Tech",
-        image: "/blog_image_3.png",
-    },
-    {
-        id: 4,
-        title: "Understanding accessibility makes you a better",
-        tag: "Tech",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 5,
-        title: "How to build scalable design systems",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 6,
-        title: "Top accessibility mistakes beginners make",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 7,
-        title: "Best 10 frameworks to learn in 2024",
-        tag: "Tech",
-        image: "/blog_image_3.png",
-    },
-    {
-        id: 8,
-        title: "Improving UI consistency with token systems",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 9,
-        title: "Why inclusive design matters",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 10,
-        title: "Top VS Code extensions for productivity",
-        tag: "Tech",
-        image: "/blog_image_3.png",
-    },
-    {
-        id: 11,
-        title: "Building color palettes for design systems",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 12,
-        title: "Keyboard navigation: what devs should know",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    }
-];
+import { Eye, EyeOff, SquarePen, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Spin, Modal } from "antd";
+import {
+    useGetBlogsQuery,
+    useDeleteBlogMutation,
+} from "@/redux/api/blogsApi";
+import { IBlog } from "@/types/blog.types";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function BlogManagementContainer() {
-    return (
-        <div className="grid xl:grid-cols-4 lg:grid-cols-3 grid-cols-1 xl:gap-9 md:gap-5 gap-3">
-            {
-                blogPosts?.map((service, index) => (
-                    <div key={service?.id} className='relative'>
+    const router = useRouter();
+    const { data: blogsData, isLoading, isError } = useGetBlogsQuery();
+    const [deleteBlog, { isLoading: isDeleting }] = useDeleteBlogMutation();
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
 
-                        <div key={service?.id} className="lg:space-y-6 md:space-y-4 space-y-2.5 group cursor-pointer ">
-                            <Image src={service?.image} alt="service-image" width={300} height={300} className="w-full rounded-2xl" />
-                            <div className="lg:space-y-1.5 space-y-1">
-                                <h1 className="xl:text-xl md:text-lg font-semibold xl:leading-7 leading-6">{service?.title}</h1>
-                                <p className="text-main-color font-medium">{service?.tag}</p>
-                            </div>
-                        </div>
-                        <div className='absolute top-2 right-2 flex gap-x-2.5 z-20'>
-                            <div className='size-8 bg-green-500 flex-center text-white rounded-full cursor-pointer'>
-                                <SquarePen size={20} />
-                            </div>
-                            <div className='size-8 bg-red-500 flex-center text-white rounded-full cursor-pointer'>
-                                <Trash2 size={20} />
-                            </div>
-                            <div className='size-8 bg-black flex-center text-white rounded-full cursor-pointer'>
-                                {index  === 2 ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </div>
-                        </div>
-                        {index  === 2 && <div className='absolute inset-0 bg-black/20 rounded-2xl z-10'/>}
+    const handleDeleteClick = (blogId: string) => {
+        setSelectedBlogId(blogId);
+        setDeleteModalOpen(true);
+    };
 
-                        
-                    </div>
-                ))
+    const handleDeleteConfirm = async () => {
+        if (!selectedBlogId) return;
+
+        try {
+            const result = await deleteBlog(selectedBlogId).unwrap();
+            if (result.success) {
+                toast.success("Blog deleted successfully!");
             }
-        </div>
-    )
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to delete blog");
+        } finally {
+            setDeleteModalOpen(false);
+            setSelectedBlogId(null);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center py-20 text-red-500">
+                Failed to load blogs. Please try again.
+            </div>
+        );
+    }
+
+    const blogs = blogsData?.data?.data || [];
+
+    if (blogs.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <p className="text-lg font-medium">No blogs found</p>
+                <p className="text-sm mt-2">Create your first blog to get started.</p>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 xl:gap-9 md:gap-5 gap-3">
+                {blogs.map((blog: IBlog) => (
+                    <div key={blog.id} className="relative group">
+                        <div
+                            className="lg:space-y-6 md:space-y-4 space-y-2.5 cursor-pointer"
+                            onClick={() => router.push(`/blog-management/${blog.id}`)}
+                        >
+                            <div className="relative w-full aspect-[16/10] rounded-2xl overflow-hidden">
+                                <Image
+                                    src={blog.image || "/blog_image_1.png"}
+                                    alt={blog.title}
+                                    fill
+                                    className="object-cover transition-transform group-hover:scale-105"
+                                    onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.src = "/blog_image_1.png";
+                                    }}
+                                />
+                            </div>
+                            <div className="lg:space-y-1.5 space-y-1">
+                                <h1 className="xl:text-xl md:text-lg font-semibold xl:leading-7 leading-6 line-clamp-2">
+                                    {blog.title}
+                                </h1>
+                                <p className="text-main-color font-medium line-clamp-1">
+                                    {blog.subTitle}
+                                </p>
+                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                    <span>{blog.view} views</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="absolute top-2 right-2 flex gap-x-2.5 z-20">
+                            <div
+                                className="size-8 bg-green-500 flex-center text-white rounded-full cursor-pointer hover:bg-green-600 transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/blog-management/edit/${blog.id}`);
+                                }}
+                                title="Edit Blog"
+                            >
+                                <SquarePen size={18} />
+                            </div>
+                            <div
+                                className="size-8 bg-red-500 flex-center text-white rounded-full cursor-pointer hover:bg-red-600 transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteClick(blog.id);
+                                }}
+                                title="Delete Blog"
+                            >
+                                <Trash2 size={18} />
+                            </div>
+                            <div
+                                className={`size-8 ${blog.isVisible ? "bg-black" : "bg-gray-400"
+                                    } flex-center text-white rounded-full cursor-pointer hover:opacity-80 transition-opacity`}
+                                title={blog.isVisible ? "Visible" : "Hidden"}
+                            >
+                                {blog.isVisible ? <Eye size={18} /> : <EyeOff size={18} />}
+                            </div>
+                        </div>
+
+                        {/* Overlay for hidden blogs */}
+                        {!blog.isVisible && (
+                            <div className="absolute inset-0 bg-black/20 rounded-2xl z-10 pointer-events-none" />
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                title="Delete Blog"
+                open={deleteModalOpen}
+                onOk={handleDeleteConfirm}
+                onCancel={() => {
+                    setDeleteModalOpen(false);
+                    setSelectedBlogId(null);
+                }}
+                okText="Delete"
+                okButtonProps={{
+                    danger: true,
+                    loading: isDeleting,
+                }}
+                cancelButtonProps={{
+                    disabled: isDeleting,
+                }}
+            >
+                <p>Are you sure you want to delete this blog? This action cannot be undone.</p>
+            </Modal>
+        </>
+    );
 }

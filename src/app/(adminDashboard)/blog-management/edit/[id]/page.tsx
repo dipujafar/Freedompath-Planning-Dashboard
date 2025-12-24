@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Form,
     FormControl,
@@ -18,9 +18,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
-import { useRouter } from "next/navigation";
-import { useCreateBlogMutation } from "@/redux/api/blogsApi";
+import { useRouter, useParams } from "next/navigation";
+import {
+    useGetSingleBlogQuery,
+    useUpdateBlogMutation,
+} from "@/redux/api/blogsApi";
 import { toast } from "sonner";
+import { Spin } from "antd";
 
 const blogSchema = z.object({
     title: z
@@ -40,11 +44,22 @@ const blogSchema = z.object({
 
 type BlogFormValues = z.infer<typeof blogSchema>;
 
-const AddBlogForm = () => {
+const EditBlogPage = () => {
     const router = useRouter();
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const params = useParams();
+    const blogId = params.id as string;
 
-    const [createBlog, { isLoading }] = useCreateBlogMutation();
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [existingImage, setExistingImage] = useState<string | null>(null);
+
+    const { data: blogData, isLoading: isFetching } = useGetSingleBlogQuery(
+        blogId,
+        {
+            skip: !blogId,
+        }
+    );
+
+    const [updateBlog, { isLoading: isUpdating }] = useUpdateBlogMutation();
 
     const form = useForm<BlogFormValues>({
         resolver: zodResolver(blogSchema),
@@ -56,15 +71,47 @@ const AddBlogForm = () => {
         },
     });
 
+    // Populate form with existing data
+    useEffect(() => {
+        if (blogData?.data) {
+            const blog = blogData.data;
+            form.setValue("title", blog.title);
+            form.setValue("subTitle", blog.subTitle);
+            form.setValue("details", blog.details);
+            form.setValue("isVisible", blog.isVisible);
+            if (blog.image) {
+                setExistingImage(blog.image);
+            }
+        }
+    }, [blogData, form]);
+
+    const handleImageChange = (file: File | undefined) => {
+        if (file) {
+            setImageFile(file);
+            setExistingImage(null);
+        }
+    };
+
     const onSubmit = async (data: BlogFormValues) => {
         const formData = new FormData();
 
-        const jsonData = {
+        const jsonData: {
+            title: string;
+            subTitle: string;
+            details: string;
+            isVisible: boolean;
+            image?: string;
+        } = {
             title: data.title,
             subTitle: data.subTitle,
             details: data.details,
             isVisible: data.isVisible,
         };
+
+        // Include existing image URL if no new file uploaded
+        if (!imageFile && existingImage) {
+            jsonData.image = existingImage;
+        }
 
         formData.append("data", JSON.stringify(jsonData));
 
@@ -73,21 +120,30 @@ const AddBlogForm = () => {
         }
 
         try {
-            const result = await createBlog(formData).unwrap();
+            const result = await updateBlog({
+                id: blogId,
+                formData,
+            }).unwrap();
 
             if (result.success) {
-                toast.success("Blog created successfully!");
-                form.reset();
-                setImageFile(null);
+                toast.success("Blog updated successfully!");
                 router.push("/blog-management");
             }
         } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to create blog");
+            toast.error(error?.data?.message || "Failed to update blog");
         }
     };
 
+    if (isFetching) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full p-2">
+        <div className="min-h-screen bg-background border border-border-color rounded-xl p-6">
             <div className="mb-6 flex items-center gap-3">
                 <Button
                     onClick={() => router.back()}
@@ -97,10 +153,13 @@ const AddBlogForm = () => {
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold">Add New Blog</h1>
+                <h1 className="text-xl font-semibold">Edit Blog</h1>
             </div>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-5 max-w-2xl"
+                >
                     <FormField
                         control={form.control}
                         name="title"
@@ -139,9 +198,24 @@ const AddBlogForm = () => {
 
                     <FormItem>
                         <FormLabel>Blog Cover Image</FormLabel>
+                        {existingImage && !imageFile && (
+                            <div className="mb-4">
+                                <p className="text-sm text-muted-foreground mb-2">
+                                    Current Image:
+                                </p>
+                                <img
+                                    src={existingImage}
+                                    alt="Current blog cover"
+                                    className="max-h-40 rounded-lg border border-border-color object-contain"
+                                />
+                            </div>
+                        )}
                         <FileUpload
-                            onFileChange={(file) => setImageFile(file as File)}
+                            onFileChange={(file) => handleImageChange(file as File)}
                         />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Leave empty to keep current image
+                        </p>
                     </FormItem>
 
                     <FormField
@@ -185,16 +259,16 @@ const AddBlogForm = () => {
 
                     <Button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isUpdating}
                         className="w-full bg-main-color py-5 hover:bg-secondary-color hover:text-black"
                     >
-                        {isLoading ? (
+                        {isUpdating ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating...
+                                Updating...
                             </>
                         ) : (
-                            "Publish Blog"
+                            "Update Blog"
                         )}
                     </Button>
                 </form>
@@ -203,4 +277,4 @@ const AddBlogForm = () => {
     );
 };
 
-export default AddBlogForm;
+export default EditBlogPage;

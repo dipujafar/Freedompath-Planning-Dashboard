@@ -18,6 +18,7 @@ export const tagTypes = {
   toolResources: "ToolResources",
   bookResources: "BookResources",
   books: "Books",
+  blogs: "Blogs",
 };
 
 export const tagTypesList = [
@@ -40,5 +41,6 @@ export const tagTypesList = [
   tagTypes.toolResources,
   tagTypes.bookResources,
   tagTypes.books,
+  tagTypes.blogs,
 ];
 
