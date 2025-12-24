@@ -12,7 +12,6 @@ export const tagTypes = {
   earning: "Earning",
   subscription: "Subscription",
   content: "Content",
-  notifications: "Notifications",
   services: "Services",
 };
 
@@ -30,7 +29,6 @@ export const tagTypesList = [
   tagTypes.earning,
   tagTypes.subscription,
   tagTypes.content,
-  tagTypes.notifications,
   tagTypes.services,
 ];
 
