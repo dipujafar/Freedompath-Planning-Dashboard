@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import {
     Form,
     FormControl,
@@ -17,9 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
-import { useRouter } from "next/navigation";
-import { useCreateBookMutation } from "@/redux/api/booksApi";
+import { useRouter, useParams } from "next/navigation";
+import {
+    useGetSingleBookQuery,
+    useUpdateBookMutation,
+} from "@/redux/api/booksApi";
 import { toast } from "sonner";
+import { Spin } from "antd";
 
 const bookSchema = z.object({
     name: z
@@ -40,13 +44,24 @@ const bookSchema = z.object({
 
 type BookFormValues = z.infer<typeof bookSchema>;
 
-const AddBookForm = () => {
+const EditBookPage = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const [existingImage, setExistingImage] = useState<string | null>(null);
     const [pdfFile, setPdfFile] = useState<File | null>(null);
+    const [existingFile, setExistingFile] = useState<string | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const router = useRouter();
+    const params = useParams();
+    const bookId = params.id as string;
 
-    const [createBook, { isLoading }] = useCreateBookMutation();
+    const { data: bookData, isLoading: isFetching } = useGetSingleBookQuery(
+        bookId,
+        {
+            skip: !bookId,
+        }
+    );
+
+    const [updateBook, { isLoading: isUpdating }] = useUpdateBookMutation();
 
     const form = useForm<BookFormValues>({
         resolver: zodResolver(bookSchema),
@@ -57,12 +72,29 @@ const AddBookForm = () => {
         },
     });
 
+    // Populate form with existing data
+    useEffect(() => {
+        if (bookData?.data) {
+            const book = bookData.data;
+            form.setValue("name", book.name);
+            form.setValue("price", book.price.toString());
+            form.setValue("details", book.details);
+            if (book.image) {
+                setExistingImage(book.image);
+            }
+            if (book.file) {
+                setExistingFile(book.file);
+            }
+        }
+    }, [bookData, form]);
+
     const handleFileDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
         setIsDragging(false);
         const file = e.dataTransfer.files[0];
         if (file && file.type === "application/pdf") {
             setPdfFile(file);
+            setExistingFile(null);
         }
     }, []);
 
@@ -70,6 +102,7 @@ const AddBookForm = () => {
         const file = e.target.files?.[0];
         if (file) {
             setPdfFile(file);
+            setExistingFile(null);
         }
     };
 
@@ -77,14 +110,35 @@ const AddBookForm = () => {
         setPdfFile(null);
     };
 
+    const handleImageChange = (file: File | undefined) => {
+        if (file) {
+            setImageFile(file);
+            setExistingImage(null);
+        }
+    };
+
     const onSubmit = async (data: BookFormValues) => {
         const formData = new FormData();
 
-        const jsonData = {
+        const jsonData: {
+            name: string;
+            price: number;
+            details: string;
+            image?: string;
+            file?: string;
+        } = {
             name: data.name,
             price: Number(data.price),
             details: data.details,
         };
+
+        // Include existing URLs if no new files uploaded
+        if (!imageFile && existingImage) {
+            jsonData.image = existingImage;
+        }
+        if (!pdfFile && existingFile) {
+            jsonData.file = existingFile;
+        }
 
         formData.append("data", JSON.stringify(jsonData));
 
@@ -97,22 +151,30 @@ const AddBookForm = () => {
         }
 
         try {
-            const result = await createBook(formData).unwrap();
+            const result = await updateBook({
+                id: bookId,
+                formData,
+            }).unwrap();
 
             if (result.success) {
-                toast.success("Book created successfully!");
-                form.reset();
-                setImageFile(null);
-                setPdfFile(null);
+                toast.success("Book updated successfully!");
                 router.push("/book-management");
             }
         } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to create book");
+            toast.error(error?.data?.message || "Failed to update book");
         }
     };
 
+    if (isFetching) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full p-2">
+        <div className="min-h-screen bg-background border border-border-color rounded-xl p-6">
             <div className="mb-6 flex items-center gap-3">
                 <Button
                     onClick={() => router.back()}
@@ -122,10 +184,13 @@ const AddBookForm = () => {
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold">Add A New Book</h1>
+                <h1 className="text-xl font-semibold">Edit Book</h1>
             </div>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-5 max-w-2xl"
+                >
                     <FormField
                         control={form.control}
                         name="name"
@@ -165,13 +230,41 @@ const AddBookForm = () => {
 
                     <FormItem>
                         <FormLabel>Book Cover Image</FormLabel>
-                        <FileUpload
-                            onFileChange={(file) => setImageFile(file as File)}
-                        />
+                        {existingImage && !imageFile && (
+                            <div className="mb-4">
+                                <p className="text-sm text-muted-foreground mb-2">
+                                    Current Image:
+                                </p>
+                                <img
+                                    src={existingImage}
+                                    alt="Current book cover"
+                                    className="max-h-32 rounded-lg border border-border-color object-contain"
+                                />
+                            </div>
+                        )}
+                        <FileUpload onFileChange={(file) => handleImageChange(file as File)} />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Leave empty to keep current image
+                        </p>
                     </FormItem>
 
                     <FormItem>
-                        <FormLabel>Upload PDF File</FormLabel>
+                        <FormLabel>PDF File</FormLabel>
+                        {existingFile && !pdfFile && (
+                            <div className="mb-4">
+                                <p className="text-sm text-muted-foreground mb-2">
+                                    Current File:
+                                </p>
+                                <a
+                                    href={existingFile}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline"
+                                >
+                                    View Current PDF
+                                </a>
+                            </div>
+                        )}
                         {pdfFile ? (
                             <div className="relative border border-border rounded-lg p-4">
                                 <button
@@ -183,7 +276,9 @@ const AddBookForm = () => {
                                 </button>
                                 <div className="flex items-center gap-3">
                                     <Upload className="text-primary" />
-                                    <p className="text-sm text-foreground truncate">{pdfFile.name}</p>
+                                    <p className="text-sm text-foreground truncate">
+                                        {pdfFile.name}
+                                    </p>
                                 </div>
                             </div>
                         ) : (
@@ -211,9 +306,9 @@ const AddBookForm = () => {
                                     <div className="w-12 h-12 rounded-full flex items-center justify-center bg-secondary-color">
                                         <Upload className="size-6 text-primary" />
                                     </div>
-                                    <p className="font-medium text-foreground">Upload your PDF</p>
+                                    <p className="font-medium text-foreground">Upload new PDF</p>
                                     <p className="text-sm text-muted-foreground">
-                                        Drag and drop or browse to choose a file
+                                        Leave empty to keep current file
                                     </p>
                                 </div>
                             </div>
@@ -240,16 +335,16 @@ const AddBookForm = () => {
 
                     <Button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isUpdating}
                         className="w-full bg-main-color py-5 hover:bg-secondary-color hover:text-black"
                     >
-                        {isLoading ? (
+                        {isUpdating ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating...
+                                Updating...
                             </>
                         ) : (
-                            "Save"
+                            "Update Book"
                         )}
                     </Button>
                 </form>
@@ -258,4 +353,4 @@ const AddBookForm = () => {
     );
 };
 
-export default AddBookForm;
+export default EditBookPage;
