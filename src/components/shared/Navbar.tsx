@@ -88,7 +88,7 @@ const Navbar = ({ collapsed, setCollapsed }: TNavbarProps) => {
                 </MenubarItem>
               </Link>
               <MenubarSeparator />
-              <Link href={"#"}>
+              <Link href={"/login"}>
                 <MenubarItem className="hover:bg-gray-100 cursor-pointer">
                   Logout
                 </MenubarItem>

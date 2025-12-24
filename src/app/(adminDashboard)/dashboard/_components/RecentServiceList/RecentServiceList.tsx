@@ -2,7 +2,8 @@
 import { Image, TableProps } from "antd";
 import { useState } from "react";
 import DataTable from "@/utils/DataTable";
-import { Eye, Link } from "lucide-react";
+import { Eye } from "lucide-react";
+import Link from "next/link";
 
 type TDataType = {
   key?: number;

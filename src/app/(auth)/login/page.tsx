@@ -1,4 +1,4 @@
-import { LoginForm } from "@/components/(auth)/login/LoginForm";
+import LoginForm from "@/components/(auth)/login/LoginForm";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,7 +7,9 @@ export const metadata: Metadata = {
 };
 
 const LoginPage = () => {
-  return <div> <LoginForm /></div>;
+  return <div className="bg-[#DEEEFF]">
+    <LoginForm />
+  </div>;
 };
 
 export default LoginPage;

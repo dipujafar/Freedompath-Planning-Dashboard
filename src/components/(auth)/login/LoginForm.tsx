@@ -1,141 +1,122 @@
-"use client";
+"use client"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+import { Button } from "@/components/ui/button"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import Link from "next/link"
+import Image from "next/image"
+import logo from "@/assets/logo-without-bg.png"
+import { useState } from "react"
+import { Eye, EyeOff } from "lucide-react"
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import Link from "next/link";
-import { LoginFormValues, loginSchema } from "./Schema";
-import LogoSection from "../LogoSection";
+const formSchema = z.object({
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+  rememberMe: z.boolean(),
+})
 
-export function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false);
-
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+export default function LoginForm() {
+  const [showPassword, setShowPassword] = useState(false)
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
-      emailOrPhone: "",
+      email: "",
       password: "",
+      rememberMe: false,
     },
-  });
+  })
 
-  const onSubmit = (values: LoginFormValues) => {
-    console.log(values);
-    // Handle login logic here
-  };
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values)
+  }
 
   return (
-    <div className="h-screen flex flex-col md:flex-row">
-      {/* Left Side - Purple Gradient with Logo */}
-      <div className="flex-1 ">
-        <LogoSection />
-      </div>
-
-      {/* Right Side - Login Form */}
-      <div className="flex-1 bg-gray-50 flex flex-col items-center justify-center px-12">
-        {/* Login Form */}
-        <div className="w-full max-w-md space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-gray-900">Log In</h2>
-            <p className="text-gray-600">
-              Access the Taste Point using your email and password.
-            </p>
+    <div className="min-h-screen flex items-center justify-center  px-4">
+      <div className="w-full max-w-4xl bg-white py-5 px-5 rounded-lg">
+        <div className="text-center">
+          <div className="flex justify-center ">
+            <Image src={logo} width={200} height={250} alt="FreedomPath Logo" />
           </div>
-
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Email/Phone Input */}
-              <FormField
-                control={form.control}
-                name="emailOrPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Email / Phone Number
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <Input
-                          type="text"
-                          placeholder="Enter your email or phone number"
-                          className="pl-10 h-12 border-gray-300 focus:border-main-color focus:ring-main-color"
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Password Input */}
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium text-gray-700">
-                      Password
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Password"
-                           className="pl-10 h-12 border-gray-300 focus:border-main-color focus:ring-main-color"
-                          {...field}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Forgot Password Link */}
-              <div className="text-left">
-                <Link
-                  href="/forget-password"
-                  className="text-sm text-main-color hover:text-red-700"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
-
-              {/* Login Button */}
-              <Button
-                type="submit"
-                className="w-full h-12 bg-main-color hover:bg-red-600 text-white font-medium text-base"
-              >
-                Log In
-              </Button>
-            </form>
-          </Form>
+          <h1 className="text-2xl font-semibold text-foreground">Welcome To FreedomPath</h1>
+          <p className="text-sm text-muted-foreground">Sign in to your account</p>
         </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-normal text-foreground">Email address</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="Enter your email" className="h-12 rounded-lg" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-normal text-foreground">Password</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input type={showPassword ? "text" : "password"} placeholder="Enter your password" className="h-12 rounded-lg" {...field} />
+                    </FormControl>
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute top-3 right-3 text-muted-foreground"
+                      >
+                        {showPassword ? <Eye /> : <EyeOff />}
+                      </button>
+                    </div>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex items-center justify-between">
+              {/* <FormField
+                control={form.control}
+                name="rememberMe"
+                render={({ field }) => (
+                  <FormItem className="flex items-center space-x-2 space-y-0">
+                    <FormControl>
+                      <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal cursor-pointer">Remember me</FormLabel>
+                  </FormItem>
+                )}
+              /> */}
+              <div></div>
+
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 hover:underline">
+                Forget Password?
+              </Link>
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full h-12 bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-lg font-normal"
+            >
+              Sign in
+            </Button>
+          </form>
+        </Form>
       </div>
     </div>
-  );
+  )
 }
