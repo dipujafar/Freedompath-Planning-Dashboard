@@ -40,8 +40,38 @@ const associatesApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, id) => [{ type: tagTypes.associates, id }],
         }),
+
+        // Create new associate
+        createAssociate: build.mutation<ISingleAssociateResponse, FormData>({
+            query: (formData) => ({
+                url: "/associates",
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: [tagTypes.associates],
+        }),
+
+        // Update associate
+        updateAssociate: build.mutation<
+            ISingleAssociateResponse,
+            { id: string; formData: FormData }
+        >({
+            query: ({ id, formData }) => ({
+                url: `/associates/${id}`,
+                method: "PATCH",
+                body: formData,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                tagTypes.associates,
+                { type: tagTypes.associates, id },
+            ],
+        }),
     }),
 });
 
-export const { useGetAssociatesQuery, useGetSingleAssociateQuery } = associatesApi;
-
+export const {
+    useGetAssociatesQuery,
+    useGetSingleAssociateQuery,
+    useCreateAssociateMutation,
+    useUpdateAssociateMutation,
+} = associatesApi;

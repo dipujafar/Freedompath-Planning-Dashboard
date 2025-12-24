@@ -1,7 +1,7 @@
 "use client";
 import { Image as AntImage, TableProps, Spin } from "antd";
 import DataTable from "@/utils/DataTable";
-import { Eye } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useGetAssociatesQuery } from "@/redux/api/associatesApi";
 import { IAssociate } from "@/types/associate.types";
@@ -73,12 +73,20 @@ const AssociatesTable = () => {
             title: "Action",
             dataIndex: "action",
             render: (_, record) => (
-                <Eye
-                    size={22}
-                    color="#78C0A8"
-                    onClick={() => router.push(`/associates-management/${record.id}`)}
-                    className="cursor-pointer hover:opacity-70 transition-opacity"
-                />
+                <div className="flex items-center gap-3">
+                    <Eye
+                        size={22}
+                        color="#78C0A8"
+                        onClick={() => router.push(`/associates-management/${record.id}`)}
+                        className="cursor-pointer hover:opacity-70 transition-opacity"
+                    />
+                    <Pencil
+                        size={20}
+                        color="#4378A8"
+                        onClick={() => router.push(`/associates-management/edit/${record.id}`)}
+                        className="cursor-pointer hover:opacity-70 transition-opacity"
+                    />
+                </div>
             ),
         },
     ];

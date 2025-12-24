@@ -1,10 +1,9 @@
 "use client";
 
-import type React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,24 +16,36 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
-import { useCreateAssociateMutation } from "@/redux/api/associatesApi";
+import {
+    useGetSingleAssociateQuery,
+    useUpdateAssociateMutation,
+} from "@/redux/api/associatesApi";
 import { toast } from "sonner";
+import { Spin } from "antd";
 
 const formSchema = z.object({
     name: z.string().min(1, "Associate name is required"),
-    photo: z.instanceof(File).optional().or(z.string().optional()),
+    photo: z.any().optional(),
     bio: z.string().min(1, "Bio is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function AddAssociatesForm() {
+const EditAssociatePage = () => {
     const [photoFile, setPhotoFile] = useState<File | null>(null);
+    const [existingPhoto, setExistingPhoto] = useState<string | null>(null);
     const router = useRouter();
+    const params = useParams();
+    const associateId = params.id as string;
 
-    const [createAssociate, { isLoading }] = useCreateAssociateMutation();
+    const { data: associateData, isLoading: isLoadingAssociate } =
+        useGetSingleAssociateQuery(associateId, {
+            skip: !associateId,
+        });
+
+    const [updateAssociate, { isLoading: isUpdating }] = useUpdateAssociateMutation();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -45,10 +56,23 @@ export function AddAssociatesForm() {
         },
     });
 
+    // Populate form with existing data
+    useEffect(() => {
+        if (associateData?.data) {
+            const associate = associateData.data;
+            form.setValue("name", associate.name);
+            form.setValue("bio", associate.bio);
+            if (associate.photo) {
+                setExistingPhoto(associate.photo);
+            }
+        }
+    }, [associateData, form]);
+
     const handlePhotoChange = (file: File | undefined) => {
         if (file) {
             setPhotoFile(file);
             form.setValue("photo", file);
+            setExistingPhoto(null); // Clear existing photo preview when new file selected
         } else {
             setPhotoFile(null);
             form.setValue("photo", undefined);
@@ -58,31 +82,49 @@ export function AddAssociatesForm() {
     async function onSubmit(values: FormValues) {
         const formData = new FormData();
 
-        const data = {
+        // Build data object - include photo URL if no new file uploaded
+        const data: { name: string; bio: string; photo?: string } = {
             name: values.name,
             bio: values.bio,
         };
 
+        // If no new photo file, include the existing photo URL in data
+        if (!photoFile && existingPhoto) {
+            data.photo = existingPhoto;
+        }
+
         formData.append("data", JSON.stringify(data));
 
+        // If new photo file uploaded, append it
         if (photoFile) {
             formData.append("photo", photoFile);
         }
 
         try {
-            const result = await createAssociate(formData).unwrap();
+            const result = await updateAssociate({
+                id: associateId,
+                formData,
+            }).unwrap();
 
             if (result.success) {
-                toast.success("Associate created successfully!");
+                toast.success("Associate updated successfully!");
                 router.push("/associates-management");
             }
         } catch (error: any) {
-            toast.error(error?.data?.message || "Failed to create associate");
+            toast.error(error?.data?.message || "Failed to update associate");
         }
     }
 
+    if (isLoadingAssociate) {
+        return (
+            <div className="min-h-[60vh] flex items-center justify-center">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
     return (
-        <div>
+        <div className="min-h-screen bg-background border border-border-color rounded-xl p-6">
             <div className="mb-6 flex items-center gap-3">
                 <Button
                     onClick={() => router.back()}
@@ -92,10 +134,10 @@ export function AddAssociatesForm() {
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <h1 className="text-xl font-semibold">Add Associate</h1>
+                <h1 className="text-xl font-semibold">Edit Associate</h1>
             </div>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
                     <FormField
                         control={form.control}
                         name="name"
@@ -116,7 +158,20 @@ export function AddAssociatesForm() {
 
                     <div>
                         <FormLabel className="font-medium">Associate Photo</FormLabel>
+                        {existingPhoto && !photoFile && (
+                            <div className="mb-4 mt-2">
+                                <p className="text-sm text-muted-foreground mb-2">Current Photo:</p>
+                                <img
+                                    src={existingPhoto}
+                                    alt="Current associate photo"
+                                    className="w-32 h-32 object-cover rounded-lg border border-border-color"
+                                />
+                            </div>
+                        )}
                         <FileUpload onFileChange={(file) => handlePhotoChange(file as File)} />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Leave empty to keep current photo
+                        </p>
                     </div>
 
                     <FormField
@@ -139,20 +194,22 @@ export function AddAssociatesForm() {
 
                     <Button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isUpdating}
                         className="w-full bg-main-color py-5 hover:bg-secondary-color hover:text-black text-white"
                     >
-                        {isLoading ? (
+                        {isUpdating ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating...
+                                Updating...
                             </>
                         ) : (
-                            "Save"
+                            "Update Associate"
                         )}
                     </Button>
                 </form>
             </Form>
         </div>
     );
-}
+};
+
+export default EditAssociatePage;

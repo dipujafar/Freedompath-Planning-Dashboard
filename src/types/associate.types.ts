@@ -36,3 +36,8 @@ export interface IAssociateQueryParams {
     limit?: number;
     searchTerm?: string;
 }
+
+export interface IAssociateFormData {
+    name: string;
+    bio: string;
+}
