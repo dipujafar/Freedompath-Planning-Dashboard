@@ -40,7 +40,39 @@ const testimonialsApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, id) => [{ type: tagTypes.testimonials, id }],
         }),
+
+        // Create new testimonial
+        createTestimonial: build.mutation<ISingleTestimonialResponse, FormData>({
+            query: (formData) => ({
+                url: "/testimonial",
+                method: "POST",
+                body: formData,
+            }),
+            invalidatesTags: [tagTypes.testimonials],
+        }),
+
+        // Update testimonial
+        updateTestimonial: build.mutation<
+            ISingleTestimonialResponse,
+            { id: string; formData: FormData }
+        >({
+            query: ({ id, formData }) => ({
+                url: `/testimonial/${id}`,
+                method: "PATCH",
+                body: formData,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                tagTypes.testimonials,
+                { type: tagTypes.testimonials, id },
+            ],
+        }),
     }),
 });
 
-export const { useGetTestimonialsQuery, useGetSingleTestimonialQuery } = testimonialsApi;
+export const {
+    useGetTestimonialsQuery,
+    useGetSingleTestimonialQuery,
+    useCreateTestimonialMutation,
+    useUpdateTestimonialMutation,
+} = testimonialsApi;
+
