@@ -1,4 +1,8 @@
-import { IServiceQueryParams, IServicesResponse } from "@/types/service.types";
+import {
+    IServiceQueryParams,
+    IServicesResponse,
+    ISingleServiceResponse,
+} from "@/types/service.types";
 import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
 
@@ -27,7 +31,17 @@ const servicesApi = baseApi.injectEndpoints({
             },
             providesTags: [tagTypes.services],
         }),
+
+        // Get single service by ID
+        getSingleService: build.query<ISingleServiceResponse, string>({
+            query: (id) => ({
+                url: `/services/${id}`,
+                method: "GET",
+            }),
+            providesTags: (result, error, id) => [{ type: tagTypes.services, id }],
+        }),
     }),
 });
 
-export const { useGetServicesQuery } = servicesApi;
+export const { useGetServicesQuery, useGetSingleServiceQuery } = servicesApi;
+

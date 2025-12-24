@@ -26,6 +26,12 @@ export interface IServicesResponse {
     };
 }
 
+export interface ISingleServiceResponse {
+    success: boolean;
+    message: string;
+    data: IService;
+}
+
 export interface IServiceQueryParams {
     page?: number;
     limit?: number;
