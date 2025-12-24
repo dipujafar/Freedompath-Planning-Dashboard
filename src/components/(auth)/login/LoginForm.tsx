@@ -9,21 +9,33 @@ import Link from "next/link"
 import Image from "next/image"
 import logo from "@/assets/logo-without-bg.png"
 import { useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Loader2 } from "lucide-react"
+import { useLoginMutation } from "@/redux/api/authApi"
+import { useAppDispatch } from "@/redux/hooks"
+import { setUser } from "@/redux/features/authSlice"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
+import { IApiError } from "@/types/auth.types"
 
 const formSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
-  password: z.string().min(8, {
-    message: "Password must be at least 8 characters.",
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
   }),
   rememberMe: z.boolean(),
 })
 
+type LoginFormValues = z.infer<typeof formSchema>
+
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const form = useForm<z.infer<typeof formSchema>>({
+  const [login, { isLoading }] = useLoginMutation()
+  const dispatch = useAppDispatch()
+  const router = useRouter()
+
+  const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -32,8 +44,41 @@ export default function LoginForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+  async function onSubmit(values: LoginFormValues) {
+    try {
+      const response = await login({
+        email: values.email,
+        password: values.password,
+      }).unwrap()
+
+      if (response.success) {
+        // Store user and token in Redux (persisted to localStorage via redux-persist)
+        dispatch(
+          setUser({
+            user: response.data.user,
+            token: response.data.accessToken,
+          })
+        )
+
+        toast.success(response.message || "Logged in successfully!")
+
+        // Redirect to dashboard
+        router.push("/dashboard")
+      }
+    } catch (error) {
+      const apiError = error as { data?: IApiError; status?: number }
+
+      // Handle different error scenarios
+      if (apiError.data?.message) {
+        toast.error(apiError.data.message)
+      } else if (apiError.status === 401) {
+        toast.error("Invalid email or password")
+      } else if (apiError.status === 403) {
+        toast.error("Your account has been blocked")
+      } else {
+        toast.error("Something went wrong. Please try again.")
+      }
+    }
   }
 
   return (
@@ -110,9 +155,17 @@ export default function LoginForm() {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-lg font-normal"
+              disabled={isLoading}
+              className="w-full h-12 bg-[#1a1a1a] hover:bg-[#2a2a2a] text-white rounded-lg font-normal disabled:opacity-70"
             >
-              Sign in
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                "Sign in"
+              )}
             </Button>
           </form>
         </Form>

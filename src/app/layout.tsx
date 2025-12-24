@@ -5,6 +5,7 @@ import { ConfigProvider } from "antd";
 import antTheme from "@/theme/antTheme";
 import { Plus_Jakarta_Sans as Poppins } from "next/font/google";
 import { Toaster } from "sonner";
+import ReduxProvider from "@/lib/ReduxProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -28,13 +29,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={poppins.className}>
-        <AntdRegistry>
-          <ConfigProvider theme={antTheme}>
-            <Toaster position="top-center" />
-            {children}
-          </ConfigProvider>
-        </AntdRegistry>
+        <ReduxProvider>
+          <AntdRegistry>
+            <ConfigProvider theme={antTheme}>
+              <Toaster position="top-center" />
+              {children}
+            </ConfigProvider>
+          </AntdRegistry>
+        </ReduxProvider>
       </body>
     </html>
   );
 }
+

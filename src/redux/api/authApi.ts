@@ -1,14 +1,14 @@
+import { ILoginRequest, ILoginResponse } from "@/types/auth.types";
 import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
 
 const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-   
-    login: build.mutation({
-      query: (data) => ({
+    login: build.mutation<ILoginResponse, ILoginRequest>({
+      query: (credentials) => ({
         url: "/auth/login",
         method: "POST",
-        body: data,
+        body: credentials,
       }),
       invalidatesTags: [tagTypes.auth],
     }),
