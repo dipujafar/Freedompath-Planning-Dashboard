@@ -1,10 +1,11 @@
 "use client";
+
 import { Image, TableProps, Spin } from "antd";
 import DataTable from "@/utils/DataTable";
 import { Eye } from "lucide-react";
 import Link from "next/link";
-import { useGetServicesQuery } from "@/redux/api/servicesApi";
-import { IService } from "@/types/service.types";
+import { useGetDashboardServicesQuery } from "@/redux/api/dashboardApi";
+import { IDashboardService } from "@/types/dashboard.types";
 import dayjs from "dayjs";
 
 type TDataType = {
@@ -12,28 +13,32 @@ type TDataType = {
   serial: number;
   id: string;
   name: string;
-  title: string;
   subtitle: string;
   image: string;
   date: string;
 };
 
 const RecentServiceList = () => {
-  // Fetch only 5 recent services for dashboard
-  const { data: servicesData, isLoading, isError } = useGetServicesQuery({ limit: 5 });
+  // Fetch services from dashboard endpoint
+  const {
+    data: servicesData,
+    isLoading,
+    isError,
+  } = useGetDashboardServicesQuery();
 
   // Transform API data to table format
   const tableData: TDataType[] =
-    servicesData?.data?.data?.map((service: IService, index: number) => ({
-      key: service.id,
-      serial: index + 1,
-      id: service.id,
-      name: service.serviceName,
-      title: service.Title,
-      subtitle: service.subTitle,
-      image: service.image,
-      date: dayjs(service.createdAt).format("DD MMM, YYYY"),
-    })) || [];
+    servicesData?.data?.data?.map(
+      (service: IDashboardService, index: number) => ({
+        key: service.id,
+        serial: index + 1,
+        id: service.id,
+        name: service.serviceName,
+        subtitle: service.subTitle,
+        image: service.image,
+        date: dayjs(service.createdAt).format("DD MMM, YYYY"),
+      })
+    ) || [];
 
   const columns: TableProps<TDataType>["columns"] = [
     {
