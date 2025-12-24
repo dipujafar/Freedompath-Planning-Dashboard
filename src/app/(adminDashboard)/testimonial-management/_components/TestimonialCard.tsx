@@ -1,35 +1,65 @@
-import { Star } from "lucide-react";
-import Image, { StaticImageData } from "next/image";
+"use client";
 
-type TReview = {
-    id: number;
-    name: string;
-    comment: string;
-    image: StaticImageData;
-    org: string;
-    rating: number
-}
+import { Star, Eye, Pencil } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ITestimonial } from "@/types/testimonial.types";
 
-export default function TestimonialCard({ review }: { review: TReview }) {
+export default function TestimonialCard({ review }: { review: ITestimonial }) {
+    const router = useRouter();
+    const fullStars = Math.floor(review.rating);
+
     return (
-        <div className=" flex flex-col md:flex-row lg:gap-8 gap-3 w-full">
-            <div className="md:w-1/3" >
-                <Image src={review?.image} alt="review_client_image" className="object-cover md:w-[239px] h-[239px] rounded-2xl" />
+        <div className="flex flex-col md:flex-row lg:gap-8 gap-3 w-full bg-section-bg rounded-xl p-4 border border-border-color">
+            <div className="md:w-1/3">
+                <div className="relative w-full h-[200px] md:w-[180px] md:h-[180px]">
+                    <Image
+                        src={review.clientPhoto || "/user_image.png"}
+                        alt={review.clientName}
+                        fill
+                        className="object-cover rounded-2xl"
+                        onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/user_image.png";
+                        }}
+                    />
+                </div>
             </div>
             <div className="md:w-2/3 py-3 flex flex-col justify-between gap-2">
                 <div className="flex gap-x-1">
-                    {
-                        Array.from({ length: review?.rating }, (_, index) => (
-                            <Star key={index} size={18} fill="#2563EB" className="text-[#2563EB]" />
-                        ))
-                    }
+                    {Array.from({ length: fullStars }, (_, index) => (
+                        <Star key={index} size={18} fill="#2563EB" className="text-[#2563EB]" />
+                    ))}
+                    {review.rating % 1 !== 0 && (
+                        <Star size={18} fill="#2563EB" className="text-[#2563EB] opacity-50" />
+                    )}
                 </div>
-                <p className="text-lg font-medium"><span>“</span>{review?.comment}  <span>”</span> </p>
-                <div className="flex items-center gap-x-2.5">
-                    <p className="text-[#090914] font-semibold">{review?.name}</p>
-                    <p className="text-[#64748B] font-medium">{review?.org}</p>
+                <p className="text-lg font-medium line-clamp-3">
+                    <span>"</span>
+                    {review.description}
+                    <span>"</span>
+                </p>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-x-2.5">
+                        <p className="text-[#090914] font-semibold">{review.clientName}</p>
+                        <p className="text-[#64748B] font-medium">{review.designation}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Eye
+                            size={20}
+                            color="#78C0A8"
+                            onClick={() => router.push(`/testimonial-management/${review.id}`)}
+                            className="cursor-pointer hover:opacity-70 transition-opacity"
+                        />
+                        <Pencil
+                            size={18}
+                            color="#4378A8"
+                            onClick={() => router.push(`/testimonial-management/edit/${review.id}`)}
+                            className="cursor-pointer hover:opacity-70 transition-opacity"
+                        />
+                    </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }
