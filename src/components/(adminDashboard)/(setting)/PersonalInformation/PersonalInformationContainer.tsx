@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, ConfigProvider, Form, Input, Spin } from "antd";
+import { Button, ConfigProvider, Form, Input, Spin, Modal } from "antd";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FaArrowLeft } from "react-icons/fa6";
@@ -27,6 +27,9 @@ const PersonalInformationContainer = () => {
   const [fileName, setFileName] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [existingImage, setExistingImage] = useState<string | null>(null);
+
+  // Password modal state
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   // Password visibility states
   const [showOldPassword, setShowOldPassword] = useState(false);
@@ -158,10 +161,23 @@ const PersonalInformationContainer = () => {
       if (result.success) {
         toast.success(result.message || "Password changed successfully!");
         passwordForm.resetFields();
+        setIsPasswordModalOpen(false);
+        // Reset visibility states
+        setShowOldPassword(false);
+        setShowNewPassword(false);
+        setShowConfirmPassword(false);
       }
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to change password");
     }
+  };
+
+  const handleClosePasswordModal = () => {
+    setIsPasswordModalOpen(false);
+    passwordForm.resetFields();
+    setShowOldPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
   };
 
   // Get initials for avatar placeholder
@@ -194,32 +210,48 @@ const PersonalInformationContainer = () => {
             Personal Information
           </h4>
         </div>
-        <div className={edit ? "hidden" : ""}>
-          <Button
-            style={{
-              backgroundColor: "var(--color-main)",
-              border: "none",
-              color: "var(--color-secondary)",
-            }}
-            onClick={() => setEdit(true)}
-            size="large"
-            icon={<FiEdit />}
-          >
-            Edit Profile
-          </Button>
+        <div className="flex items-center gap-3">
+          {!edit && (
+            <>
+              <Button
+                style={{
+                  backgroundColor: "transparent",
+                  border: "1px solid var(--color-main)",
+                  color: "var(--color-main)",
+                }}
+                onClick={() => setIsPasswordModalOpen(true)}
+                size="large"
+                icon={<Lock size={16} />}
+              >
+                Change Password
+              </Button>
+              <Button
+                style={{
+                  backgroundColor: "var(--color-main)",
+                  border: "none",
+                  color: "var(--color-secondary)",
+                }}
+                onClick={() => setEdit(true)}
+                size="large"
+                icon={<FiEdit />}
+              >
+                Edit Profile
+              </Button>
+            </>
+          )}
+          {edit && (
+            <Button
+              style={{
+                backgroundColor: "#f5f5f5",
+                border: "1px solid #ddd",
+              }}
+              onClick={handleCancelEdit}
+              size="large"
+            >
+              Cancel
+            </Button>
+          )}
         </div>
-        {edit && (
-          <Button
-            style={{
-              backgroundColor: "#f5f5f5",
-              border: "1px solid #ddd",
-            }}
-            onClick={handleCancelEdit}
-            size="large"
-          >
-            Cancel
-          </Button>
-        )}
       </div>
       <hr className="my-4" />
 
@@ -279,7 +311,9 @@ const PersonalInformationContainer = () => {
                 </>
               )}
             </div>
-            <h3 className="text-2xl text-center max-w-[280px] break-words">{userData?.name || "Admin"}</h3>
+            <h3 className="text-2xl text-center max-w-[280px] break-words">
+              {userData?.name || "Admin"}
+            </h3>
             <p className="text-sm text-center text-muted-foreground">
               {userData?.role || "admin"}
             </p>
@@ -381,13 +415,21 @@ const PersonalInformationContainer = () => {
         </div>
       </div>
 
-      {/* Change Password Section */}
-      <div className="mt-10">
-        <hr className="my-6" />
-        <h4 className="text-xl font-medium text-text-color mb-4 flex items-center gap-2">
-          <Lock size={20} />
-          Change Password
-        </h4>
+      {/* Change Password Modal */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2 text-lg font-semibold">
+            <Lock size={20} />
+            Change Password
+          </div>
+        }
+        open={isPasswordModalOpen}
+        onCancel={handleClosePasswordModal}
+        footer={null}
+        width={450}
+        centered
+        destroyOnClose
+      >
         <ConfigProvider
           theme={{
             components: {
@@ -406,31 +448,33 @@ const PersonalInformationContainer = () => {
             form={passwordForm}
             onFinish={handleChangePassword}
             layout="vertical"
-            className="max-w-md"
+            className="mt-4"
           >
             {/* Old Password */}
             <Form.Item
               label="Current Password"
               name="oldPassword"
               rules={[
-                { required: true, message: "Please enter your current password" },
+                {
+                  required: true,
+                  message: "Please enter your current password",
+                },
               ]}
             >
-              <div className="relative">
-                <Input
-                  type={showOldPassword ? "text" : "password"}
-                  size="large"
-                  placeholder="Enter current password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowOldPassword(!showOldPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
+              <Input
+                type={showOldPassword ? "text" : "password"}
+                size="large"
+                placeholder="Enter current password"
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                }
+              />
             </Form.Item>
 
             {/* New Password */}
@@ -442,21 +486,20 @@ const PersonalInformationContainer = () => {
                 { min: 6, message: "Password must be at least 6 characters" },
               ]}
             >
-              <div className="relative">
-                <Input
-                  type={showNewPassword ? "text" : "password"}
-                  size="large"
-                  placeholder="Enter new password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
+              <Input
+                type={showNewPassword ? "text" : "password"}
+                size="large"
+                placeholder="Enter new password"
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                }
+              />
             </Form.Item>
 
             {/* Confirm Password */}
@@ -476,46 +519,61 @@ const PersonalInformationContainer = () => {
                 }),
               ]}
             >
-              <div className="relative">
-                <Input
-                  type={showConfirmPassword ? "text" : "password"}
-                  size="large"
-                  placeholder="Confirm new password"
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
+              <Input
+                type={showConfirmPassword ? "text" : "password"}
+                size="large"
+                placeholder="Confirm new password"
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                  </button>
+                }
+              />
             </Form.Item>
 
-            <Button
-              htmlType="submit"
-              size="large"
-              disabled={isChangingPassword}
-              style={{
-                border: "none",
-                backgroundColor: "var(--color-main)",
-                color: "#fff",
-                width: "200px",
-              }}
-            >
-              {isChangingPassword ? (
-                <span className="flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Changing...
-                </span>
-              ) : (
-                "Change Password"
-              )}
-            </Button>
+            <div className="flex gap-3 mt-6">
+              <Button
+                size="large"
+                onClick={handleClosePasswordModal}
+                className="flex-1"
+                style={{
+                  border: "1px solid #ddd",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                htmlType="submit"
+                size="large"
+                disabled={isChangingPassword}
+                className="flex-1"
+                style={{
+                  border: "none",
+                  backgroundColor: "var(--color-main)",
+                  color: "#fff",
+                }}
+              >
+                {isChangingPassword ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Changing...
+                  </span>
+                ) : (
+                  "Change Password"
+                )}
+              </Button>
+            </div>
           </Form>
         </ConfigProvider>
-      </div>
+      </Modal>
     </div>
   );
 };
