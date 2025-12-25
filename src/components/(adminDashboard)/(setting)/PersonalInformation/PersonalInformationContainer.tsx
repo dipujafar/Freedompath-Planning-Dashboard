@@ -56,7 +56,7 @@ const PersonalInformationContainer = () => {
     formData.append("data", JSON.stringify(jsonData));
 
     if (fileName) {
-      formData.append("image", fileName);
+      formData.append("profile", fileName);
     }
 
     try {
