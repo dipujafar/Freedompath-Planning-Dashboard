@@ -195,7 +195,7 @@ const PersonalInformationContainer = () => {
       {/* personal information */}
       <div className="mt-10 flex justify-center flex-col xl:flex-row items-center gap-10">
         <div className="bg-[#fff] h-[365px] md:w-[350px] rounded-xl border border-main-color flex justify-center items-center text-text-color">
-          <div className="space-y-1 relative">
+          <div className="flex flex-col items-center gap-2">
             <div className="relative group">
               {displayImage ? (
                 <Image
@@ -248,7 +248,7 @@ const PersonalInformationContainer = () => {
                 </>
               )}
             </div>
-            <h3 className="text-2xl text-center">{userData?.name || "Admin"}</h3>
+            <h3 className="text-2xl text-center max-w-[280px] break-words">{userData?.name || "Admin"}</h3>
             <p className="text-sm text-center text-muted-foreground">
               {userData?.role || "admin"}
             </p>
