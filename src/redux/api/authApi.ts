@@ -1,9 +1,18 @@
-import { ILoginRequest, ILoginResponse } from "@/types/auth.types";
+import {
+  ILoginRequest,
+  ILoginResponse,
+  IForgotPasswordResponse,
+  IVerifyOtpResponse,
+  IResendOtpResponse,
+  IChangePasswordResponse,
+  IChangePasswordRequest,
+} from "@/types/auth.types";
 import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
 
 const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    // Login
     login: build.mutation<ILoginResponse, ILoginRequest>({
       query: (credentials) => ({
         url: "/auth/login",
@@ -12,45 +21,53 @@ const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: [tagTypes.auth],
     }),
-    forgetPassword: build.mutation({
+
+    // Forgot password - sends OTP to email
+    forgotPassword: build.mutation<IForgotPasswordResponse, { email: string }>({
       query: (data) => ({
         url: "/auth/forgot-password",
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: [tagTypes.auth],
     }),
-    verifyOtp: build.mutation({
+
+    // Verify OTP
+    verifyOtp: build.mutation<IVerifyOtpResponse, { otp: string }>({
       query: (data) => ({
         url: "/otp/verify-otp",
         method: "POST",
         body: data,
       }),
-      invalidatesTags: [tagTypes.auth],
     }),
-    resetPassword: build.mutation({
+
+    // Resend OTP
+    resendOtp: build.mutation<IResendOtpResponse, { email: string }>({
       query: (data) => ({
-        url: "/auth/reset-password",
-        method: "PATCH",
+        url: "/otp/resend-otp",
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: [tagTypes.auth],
     }),
-    changePassword: build.mutation({
+
+    // Change password (for resetting after OTP verification)
+    changePassword: build.mutation<
+      IChangePasswordResponse,
+      IChangePasswordRequest
+    >({
       query: (data) => ({
         url: "/auth/change-password",
         method: "PATCH",
         body: data,
       }),
       invalidatesTags: [tagTypes.auth],
-    })
+    }),
   }),
 });
 
 export const {
   useLoginMutation,
-  useForgetPasswordMutation,
+  useForgotPasswordMutation,
   useVerifyOtpMutation,
-  useResetPasswordMutation,
-  useChangePasswordMutation
+  useResendOtpMutation,
+  useChangePasswordMutation,
 } = authApi;

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -15,9 +15,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import LogoSection from "../LogoSection";
-
 import { useRouter } from "next/navigation";
 import { ResetPasswordFormValues, resetPasswordSchema } from "./schema";
+import { useChangePasswordMutation } from "@/redux/api/authApi";
+import { toast } from "sonner";
 
 export function ResetPasswordForm() {
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -32,10 +33,27 @@ export function ResetPasswordForm() {
   });
   const router = useRouter();
 
-  const onSubmit = (values: ResetPasswordFormValues) => {
-    console.log("Password reset submitted:", values);
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
 
-    router.push("/login");
+  const onSubmit = async (values: ResetPasswordFormValues) => {
+    try {
+      // For reset password flow after OTP verification, we use a placeholder for oldPassword
+      // since the user doesn't know their old password (they forgot it)
+      const result = await changePassword({
+        oldPassword: "", // Backend should handle this differently for password reset flow
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      }).unwrap();
+
+      if (result.success) {
+        toast.success(result.message || "Password changed successfully!");
+        router.push("/login");
+      }
+    } catch (error: any) {
+      toast.error(
+        error?.data?.message || "Failed to reset password. Please try again."
+      );
+    }
   };
 
   return (
@@ -52,7 +70,7 @@ export function ResetPasswordForm() {
               Create New Password
             </h2>
             <p className="text-gray-600">
-              Please enter the otp we have sent you in your email.
+              Please enter your new password below.
             </p>
           </div>
 
@@ -72,7 +90,7 @@ export function ResetPasswordForm() {
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                         <Input
                           type={showNewPassword ? "text" : "password"}
-                          placeholder="Password"
+                          placeholder="Enter new password"
                           className="pl-10 pr-10 h-12 border-gray-300 focus:border-main-color focus:ring-main-color"
                           {...field}
                         />
@@ -101,14 +119,14 @@ export function ResetPasswordForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium text-gray-700">
-                      Re-enter Password
+                      Confirm Password
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                         <Input
                           type={showConfirmPassword ? "text" : "password"}
-                          placeholder="Password"
+                          placeholder="Confirm new password"
                           className="pl-10 pr-10 h-12 border-gray-300 focus:border-main-color focus:ring-main-color"
                           {...field}
                         />
@@ -135,9 +153,17 @@ export function ResetPasswordForm() {
               {/* Reset Password Button */}
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-main-color hover:bg-red-700 text-white font-medium text-base"
               >
-                Reset Password
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Resetting Password...
+                  </>
+                ) : (
+                  "Reset Password"
+                )}
               </Button>
             </form>
           </Form>
