@@ -8,11 +8,12 @@ import { FiEdit } from "react-icons/fi";
 import profile from "@/assets/image/adminProfile.png";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { Camera, Loader2, Trash2 } from "lucide-react";
+import { Camera, Loader2, Trash2, Eye, EyeOff, Lock } from "lucide-react";
 import {
   useGetMyProfileQuery,
   useUpdateMyProfileMutation,
 } from "@/redux/api/profileApi";
+import { useChangePasswordMutation } from "@/redux/api/authApi";
 import { useAppDispatch } from "@/redux/hooks";
 import { setUser } from "@/redux/features/authSlice";
 import Cookies from "js-cookie";
@@ -21,14 +22,22 @@ const PersonalInformationContainer = () => {
   const route = useRouter();
   const dispatch = useAppDispatch();
   const [form] = Form.useForm();
+  const [passwordForm] = Form.useForm();
   const [edit, setEdit] = useState(false);
   const [fileName, setFileName] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [existingImage, setExistingImage] = useState<string | null>(null);
 
+  // Password visibility states
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const { data: profileData, isLoading: isFetching } = useGetMyProfileQuery();
   const [updateMyProfile, { isLoading: isUpdating }] =
     useUpdateMyProfileMutation();
+  const [changePassword, { isLoading: isChangingPassword }] =
+    useChangePasswordMutation();
 
   // Populate form with existing data
   useEffect(() => {
@@ -130,6 +139,28 @@ const PersonalInformationContainer = () => {
         email: profileData.data.email,
         phone: profileData.data.phoneNumber || "",
       });
+    }
+  };
+
+  // Handle password change
+  const handleChangePassword = async (values: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    try {
+      const result = await changePassword({
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      }).unwrap();
+
+      if (result.success) {
+        toast.success(result.message || "Password changed successfully!");
+        passwordForm.resetFields();
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to change password");
     }
   };
 
@@ -348,6 +379,142 @@ const PersonalInformationContainer = () => {
             </Form>
           </ConfigProvider>
         </div>
+      </div>
+
+      {/* Change Password Section */}
+      <div className="mt-10">
+        <hr className="my-6" />
+        <h4 className="text-xl font-medium text-text-color mb-4 flex items-center gap-2">
+          <Lock size={20} />
+          Change Password
+        </h4>
+        <ConfigProvider
+          theme={{
+            components: {
+              Input: {
+                colorBgContainer: "#fff",
+                colorText: "#333",
+                colorTextPlaceholder: "#999",
+              },
+              Form: {
+                labelColor: "#333",
+              },
+            },
+          }}
+        >
+          <Form
+            form={passwordForm}
+            onFinish={handleChangePassword}
+            layout="vertical"
+            className="max-w-md"
+          >
+            {/* Old Password */}
+            <Form.Item
+              label="Current Password"
+              name="oldPassword"
+              rules={[
+                { required: true, message: "Please enter your current password" },
+              ]}
+            >
+              <div className="relative">
+                <Input
+                  type={showOldPassword ? "text" : "password"}
+                  size="large"
+                  placeholder="Enter current password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOldPassword(!showOldPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showOldPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </Form.Item>
+
+            {/* New Password */}
+            <Form.Item
+              label="New Password"
+              name="newPassword"
+              rules={[
+                { required: true, message: "Please enter a new password" },
+                { min: 6, message: "Password must be at least 6 characters" },
+              ]}
+            >
+              <div className="relative">
+                <Input
+                  type={showNewPassword ? "text" : "password"}
+                  size="large"
+                  placeholder="Enter new password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </Form.Item>
+
+            {/* Confirm Password */}
+            <Form.Item
+              label="Confirm New Password"
+              name="confirmPassword"
+              dependencies={["newPassword"]}
+              rules={[
+                { required: true, message: "Please confirm your new password" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("newPassword") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Passwords do not match"));
+                  },
+                }),
+              ]}
+            >
+              <div className="relative">
+                <Input
+                  type={showConfirmPassword ? "text" : "password"}
+                  size="large"
+                  placeholder="Confirm new password"
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </Form.Item>
+
+            <Button
+              htmlType="submit"
+              size="large"
+              disabled={isChangingPassword}
+              style={{
+                border: "none",
+                backgroundColor: "var(--color-main)",
+                color: "#fff",
+                width: "200px",
+              }}
+            >
+              {isChangingPassword ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Changing...
+                </span>
+              ) : (
+                "Change Password"
+              )}
+            </Button>
+          </Form>
+        </ConfigProvider>
       </div>
     </div>
   );

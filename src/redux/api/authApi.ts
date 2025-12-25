@@ -31,12 +31,18 @@ const authApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // Verify OTP
-    verifyOtp: build.mutation<IVerifyOtpResponse, { otp: string }>({
-      query: (data) => ({
+    // Verify OTP - requires token from forgot password in header
+    verifyOtp: build.mutation<
+      IVerifyOtpResponse,
+      { otp: string; token: string }
+    >({
+      query: ({ otp, token }) => ({
         url: "/otp/verify-otp",
         method: "POST",
-        body: data,
+        body: { otp },
+        headers: {
+          token: token,
+        },
       }),
     }),
 

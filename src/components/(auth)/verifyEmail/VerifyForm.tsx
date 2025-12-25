@@ -35,17 +35,21 @@ export function OtpVerificationForm() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [email, setEmail] = useState<string>("");
+  const [resetToken, setResetToken] = useState<string>("");
 
   const [verifyOtp, { isLoading: isVerifying }] = useVerifyOtpMutation();
   const [resendOtp, { isLoading: isResending }] = useResendOtpMutation();
 
-  // Get email from session storage on mount
+  // Get email and token from session storage on mount
   useEffect(() => {
     const storedEmail = sessionStorage.getItem("resetEmail");
-    if (storedEmail) {
+    const storedToken = sessionStorage.getItem("resetToken");
+
+    if (storedEmail && storedToken) {
       setEmail(storedEmail);
+      setResetToken(storedToken);
     } else {
-      // No email in session, redirect back to forgot password
+      // No email/token in session, redirect back to forgot password
       router.push("/forget-password");
     }
   }, [router]);
@@ -103,8 +107,14 @@ export function OtpVerificationForm() {
   };
 
   const onSubmit = async (values: OtpFormValues) => {
+    if (!resetToken) {
+      toast.error("Session expired. Please request a new OTP.");
+      router.push("/forget-password");
+      return;
+    }
+
     try {
-      const result = await verifyOtp({ otp: values.otp }).unwrap();
+      const result = await verifyOtp({ otp: values.otp, token: resetToken }).unwrap();
 
       if (result.success) {
         toast.success(result.message || "OTP verified successfully!");
@@ -141,9 +151,10 @@ export function OtpVerificationForm() {
 
       if (result.success) {
         toast.success(result.message || "OTP sent successfully!");
-        // Update token in session storage
+        // Update token in session storage and state
         if (result.data.token) {
           sessionStorage.setItem("resetToken", result.data.token);
+          setResetToken(result.data.token);
         }
       }
     } catch (error: any) {
