@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
 import { useRouter } from "next/navigation";
@@ -189,8 +190,8 @@ const AddBookForm = () => {
                         ) : (
                             <div
                                 className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer bg-[#F9FAFB] ${isDragging
-                                        ? "border-primary"
-                                        : "border-border hover:border-primary/50"
+                                    ? "border-primary"
+                                    : "border-border hover:border-primary/50"
                                     }`}
                                 onDrop={handleFileDrop}
                                 onDragOver={(e) => {
@@ -227,10 +228,10 @@ const AddBookForm = () => {
                             <FormItem>
                                 <FormLabel>Book Details</FormLabel>
                                 <FormControl>
-                                    <Textarea
+                                    <RichTextEditor
                                         placeholder="Write book details here"
-                                        {...field}
-                                        className="min-h-32 resize-y border border-[#E1E1E1] bg-[#F9FAFB]"
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />

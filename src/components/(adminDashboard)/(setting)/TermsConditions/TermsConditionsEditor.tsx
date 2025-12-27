@@ -2,9 +2,10 @@
 
 import { Button, Spin } from "antd";
 import dynamic from "next/dynamic";
+
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import "react-quill/dist/quill.snow.css";
+
 import {
   useGetContentsQuery,
   useUpdateContentsMutation,
@@ -12,7 +13,7 @@ import {
 import { toast } from "sonner";
 
 // Dynamically import ReactQuill with SSR disabled
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import RichTextEditor from "@/components/shared/RichTextEditor";
 
 const TermsConditionsEditor = () => {
   const [value, setValue] = useState("");
@@ -28,18 +29,7 @@ const TermsConditionsEditor = () => {
     }
   }, [contentsData]);
 
-  const toolbarOptions = [
-    ["image"],
-    [{ header: [1, 2, false] }],
-    ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ align: [] }],
-    [{ color: [] }, { background: [] }],
-  ];
 
-  const moduleConest = {
-    toolbar: toolbarOptions,
-  };
 
   const handleSave = async () => {
     try {
@@ -73,16 +63,10 @@ const TermsConditionsEditor = () => {
         </h4>
       </div>
       <div className="mt-5 border rounded p-2">
-        <ReactQuill
-          modules={moduleConest}
-          theme="snow"
+        <RichTextEditor
           value={value}
           onChange={setValue}
           placeholder="Start writing ......"
-          style={{
-            marginTop: "20px",
-            borderRadius: "10px",
-          }}
         />
       </div>
 
