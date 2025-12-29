@@ -195,7 +195,7 @@ const EditBookResourcePage = () => {
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-4 max-w-2xl"
+                    className="space-y-4"
                 >
                     <FormField
                         control={form.control}
