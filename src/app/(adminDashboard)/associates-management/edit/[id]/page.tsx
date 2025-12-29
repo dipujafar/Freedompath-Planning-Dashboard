@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 import { useRouter, useParams } from "next/navigation";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
 import {
@@ -181,10 +182,10 @@ const EditAssociatePage = () => {
                             <FormItem>
                                 <FormLabel className="font-medium">Bio</FormLabel>
                                 <FormControl>
-                                    <Textarea
+                                    <RichTextEditor
                                         placeholder="Enter associate bio..."
-                                        className="min-h-32 resize-y border border-[#E1E1E1] bg-[#F9FAFB]"
-                                        {...field}
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />

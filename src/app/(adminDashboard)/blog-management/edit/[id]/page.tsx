@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
@@ -225,10 +226,10 @@ const EditBlogPage = () => {
                             <FormItem>
                                 <FormLabel>Blog Content</FormLabel>
                                 <FormControl>
-                                    <Textarea
+                                    <RichTextEditor
                                         placeholder="Write blog content here..."
-                                        {...field}
-                                        className="min-h-48 resize-y border border-[#E1E1E1] bg-[#F9FAFB]"
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                 </FormControl>
                                 <FormMessage />
