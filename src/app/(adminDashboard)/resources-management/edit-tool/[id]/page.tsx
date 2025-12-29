@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import RichTextEditor from "@/components/shared/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import {
     useGetSingleToolResourceQuery,
@@ -149,10 +148,10 @@ const EditToolResourcePage = () => {
                             <FormItem>
                                 <FormLabel className="font-medium">Resource Details</FormLabel>
                                 <FormControl>
-                                    <RichTextEditor
+                                    <Textarea
                                         placeholder="Enter resource details"
-                                        value={field.value}
-                                        onChange={field.onChange}
+                                        {...field}
+                                        className="border border-[#E1E1E1] bg-[#F9FAFB] min-h-[120px]"
                                     />
                                 </FormControl>
                                 <FormMessage />
