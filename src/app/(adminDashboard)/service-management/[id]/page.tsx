@@ -3,7 +3,7 @@
 import { useGetSingleServiceQuery } from "@/redux/api/servicesApi";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, CheckCircle2, Zap } from "lucide-react";
 import { Spin } from "antd";
 
 import dayjs from "dayjs";
@@ -105,15 +105,7 @@ const ServiceDetailPage = () => {
                             </h2>
                         </div>
 
-                        {/* Title */}
-                        <div className="bg-section-bg rounded-2xl border border-border-color p-6">
-                            <label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                                Title
-                            </label>
-                            <h3 className="text-xl font-medium text-foreground mt-2">
-                                {service.Title}
-                            </h3>
-                        </div>
+
 
                         {/* Subtitle */}
                         <div className="bg-section-bg rounded-2xl border border-border-color p-6">
@@ -182,8 +174,73 @@ const ServiceDetailPage = () => {
                                 </span>
                             </div>
                         </div>
+
                     </div>
                 </div>
+
+                {/* What Your Client Gets Section */}
+                {service.whatYourClientGets && (
+                    <div className="mt-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <h2 className="text-xl font-semibold">What Your Client Gets</h2>
+                        </div>
+                        <div className="bg-section-bg rounded-2xl border border-border-color p-6 md:p-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                                {/* Image */}
+                                <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border-color bg-white">
+                                    <img
+                                        src={service.whatYourClientGets.image || "/service_image.jpg"}
+                                        alt="Client Benefits"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                            e.currentTarget.src = "/service_image.jpg";
+                                        }}
+                                    />
+                                </div>
+
+                                {/* Options List */}
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-medium text-foreground mb-4">Benefits & Features</h3>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {service.whatYourClientGets.options.map((option: any) => (
+                                            <div key={option.id} className="flex gap-4 p-4 bg-white rounded-xl border border-border-color shadow-sm">
+                                                <div className="shrink-0 mt-1">
+                                                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                                        <CheckCircle2 className="w-5 h-5" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-foreground">{option.title}</h4>
+                                                    <p className="text-sm text-muted-foreground mt-1">{option.subTitle}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Included Services Section */}
+                {service.includedServices && service.includedServices.length > 0 && (
+                    <div className="mt-8">
+                        <div className="flex items-center gap-2 mb-4">
+                            <h2 className="text-xl font-semibold">Included Services</h2>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {service.includedServices.map((included: any) => (
+                                <div key={included.id} className="bg-section-bg p-6 rounded-2xl border border-border-color hover:border-main-color transition-colors group">
+                                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 mb-4 group-hover:bg-main-color group-hover:text-white transition-colors">
+                                        <Zap className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="font-semibold text-lg text-foreground mb-2">{included.title}</h3>
+                                    <p className="text-sm text-muted-foreground">{included.subTitle}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
