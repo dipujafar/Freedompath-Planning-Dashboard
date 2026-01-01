@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock } from "lucide-react";
 import { Spin } from "antd";
-import Image from "next/image";
+
 import dayjs from "dayjs";
 
 const ServiceDetailPage = () => {
@@ -82,14 +82,12 @@ const ServiceDetailPage = () => {
                     {/* Service Image */}
                     <div className="lg:col-span-1">
                         <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-border-color bg-section-bg">
-                            <Image
+                            <img
                                 src={service.image || "/service_image.jpg"}
                                 alt={service.serviceName}
-                                fill
-                                className="object-cover"
+                                className="w-full h-full object-cover"
                                 onError={(e) => {
-                                    const target = e.target as HTMLImageElement;
-                                    target.src = "/service_image.jpg";
+                                    e.currentTarget.src = "/service_image.jpg";
                                 }}
                             />
                         </div>
@@ -172,8 +170,8 @@ const ServiceDetailPage = () => {
                             <div className="mt-3">
                                 <span
                                     className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${service.isDeleted
-                                            ? "bg-red-100 text-red-700"
-                                            : "bg-green-100 text-green-700"
+                                        ? "bg-red-100 text-red-700"
+                                        : "bg-green-100 text-green-700"
                                         }`}
                                 >
                                     <span

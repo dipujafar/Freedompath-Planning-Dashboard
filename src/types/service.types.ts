@@ -9,6 +9,26 @@ export interface IService {
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;
+    whatYourClientGets?: IWhatYourClientGets;
+    includedServices: any[];
+}
+
+export interface IServiceOption {
+    id: string;
+    title: string;
+    subTitle: string;
+    createdAt: string;
+    updatedAt: string;
+    parentId: string;
+}
+
+export interface IWhatYourClientGets {
+    id: string;
+    serviceId: string;
+    image: string;
+    createdAt: string;
+    updatedAt: string;
+    options: IServiceOption[];
 }
 
 export interface IMeta {

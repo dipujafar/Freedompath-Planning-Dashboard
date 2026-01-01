@@ -40,8 +40,16 @@ const servicesApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, id) => [{ type: tagTypes.services, id }],
         }),
+        createService: build.mutation<ISingleServiceResponse, any>({
+            query: (data) => ({
+                url: "/services",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.services],
+        }),
     }),
 });
 
-export const { useGetServicesQuery, useGetSingleServiceQuery } = servicesApi;
+export const { useGetServicesQuery, useGetSingleServiceQuery, useCreateServiceMutation } = servicesApi;
 

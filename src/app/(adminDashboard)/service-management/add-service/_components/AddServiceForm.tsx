@@ -10,6 +10,8 @@ import { HeroSectionStep } from "./form-step/HeroSectionStep"
 import { WhatClientGetsStep } from "./form-step/WhatClientGetsStep"
 import { IncludedServicesStep } from "./form-step/IncludedServicesStep"
 import { useRouter } from "next/navigation"
+import { useCreateServiceMutation } from "@/redux/api/servicesApi"
+import { toast } from "sonner"
 
 
 const formSchema = z.object({
@@ -38,6 +40,7 @@ export type FormData = z.infer<typeof formSchema>
 export function AddServiceForm() {
     const [currentStep, setCurrentStep] = useState(0);
     const router = useRouter();
+    const [createService, { isLoading }] = useCreateServiceMutation();
 
     const form = useForm<FormData>({
         resolver: zodResolver(formSchema),
@@ -49,18 +52,47 @@ export function AddServiceForm() {
         },
     })
 
-    const onSubmit = (data: FormData) => {
-        console.log("Form submitted:", data)
-        // Handle form submission here
+    const onSubmit = async (data: FormData) => {
+        const formData = new FormData();
+
+        const serviceData = {
+            serviceName: data.serviceName,
+            subTitle: data.subTitle,
+            whatYourClientGets: {
+                options: data.clientGetsItems
+            },
+            includedServices: data.includedServices
+        }
+
+        formData.append("data", JSON.stringify(serviceData));
+
+        if (data.servicePhoto instanceof File) {
+            formData.append("image", data.servicePhoto);
+        }
+
+        if (data.clientGetsImage instanceof File) {
+            formData.append("clientGetsImage", data.clientGetsImage);
+        }
+
+        const toastId = toast.loading("Creating service...");
+
+        try {
+            await createService(formData).unwrap();
+            toast.success("Service created successfully", { id: toastId });
+            router.push("/service-management");
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to create service", { id: toastId });
+            console.error(error);
+        }
     }
 
     const handleNext = async () => {
         let fieldsToValidate: (keyof FormData)[] = []
 
         if (currentStep === 0) {
-            fieldsToValidate = ["serviceName", "subTitle"]
+            fieldsToValidate = ["serviceName", "subTitle", "servicePhoto"]
         } else if (currentStep === 1) {
-            fieldsToValidate = ["clientGetsItems"]
+            fieldsToValidate = ["clientGetsItems", "clientGetsImage"]
         }
 
         const isValid = await form.trigger(fieldsToValidate)
@@ -132,7 +164,9 @@ export function AddServiceForm() {
                                 <Button type="button" variant="outline" onClick={handlePrevious}>
                                     Previous
                                 </Button>
-                                <Button type="submit">Submit</Button>
+                                <Button type="submit" disabled={isLoading} className="bg-main-color hover:bg-secondary-color hover:text-black">
+                                    {isLoading ? "Creating..." : "Submit"}
+                                </Button>
                             </div>
                         </div>
                     )}
