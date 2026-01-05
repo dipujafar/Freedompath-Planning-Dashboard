@@ -1,12 +1,13 @@
 "use client";
 
-import { Eye, EyeOff, SquarePen, Trash2 } from "lucide-react";
+import { Eye, EyeOff, SquarePen, Trash2, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Spin, Modal } from "antd";
 import {
     useGetBlogsQuery,
     useDeleteBlogMutation,
+    useUpdateBlogMutation,
 } from "@/redux/api/blogsApi";
 import { IBlog } from "@/types/blog.types";
 import { toast } from "sonner";
@@ -16,12 +17,45 @@ export default function BlogManagementContainer() {
     const router = useRouter();
     const { data: blogsData, isLoading, isError } = useGetBlogsQuery();
     const [deleteBlog, { isLoading: isDeleting }] = useDeleteBlogMutation();
+    const [updateBlog] = useUpdateBlogMutation();
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
+    const [togglingBlogId, setTogglingBlogId] = useState<string | null>(null);
 
     const handleDeleteClick = (blogId: string) => {
         setSelectedBlogId(blogId);
         setDeleteModalOpen(true);
+    };
+
+    const handleToggleVisibility = async (blog: IBlog) => {
+        setTogglingBlogId(blog.id);
+
+        const formData = new FormData();
+        const jsonData = {
+            title: blog.title,
+            subTitle: blog.subTitle,
+            details: blog.details,
+            isVisible: !blog.isVisible,
+            image: blog.image,
+        };
+        formData.append("data", JSON.stringify(jsonData));
+
+        try {
+            const result = await updateBlog({
+                id: blog.id,
+                formData,
+            }).unwrap();
+
+            if (result.success) {
+                toast.success(
+                    `Blog ${!blog.isVisible ? "is now visible" : "has been hidden"}`
+                );
+            }
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to update visibility");
+        } finally {
+            setTogglingBlogId(null);
+        }
     };
 
     const handleDeleteConfirm = async () => {
@@ -73,7 +107,8 @@ export default function BlogManagementContainer() {
                 {blogs.map((blog: IBlog) => (
                     <div
                         key={blog.id}
-                        className="relative group bg-white rounded-2xl overflow-hidden shadow-sm border border-border-color hover:shadow-md transition-shadow duration-300"
+                        className={`relative group bg-white rounded-2xl overflow-hidden shadow-sm border border-border-color hover:shadow-md transition-all duration-300 ${!blog.isVisible ? "opacity-60 grayscale-[20%]" : ""
+                            }`}
                     >
                         {/* Image Container */}
                         <div
@@ -113,15 +148,28 @@ export default function BlogManagementContainer() {
                                 >
                                     <Trash2 size={16} />
                                 </button>
-                                <div
-                                    className={`size-9 flex items-center justify-center text-white rounded-full shadow-lg ${blog.isVisible
-                                            ? "bg-black/70"
-                                            : "bg-gray-500"
-                                        }`}
-                                    title={blog.isVisible ? "Visible" : "Hidden"}
+                                <button
+                                    className={`size-9 flex items-center justify-center text-white rounded-full shadow-lg cursor-pointer transition-all duration-200 hover:scale-110 ${blog.isVisible
+                                        ? "bg-blue-500 hover:bg-blue-600"
+                                        : "bg-gray-500 hover:bg-gray-600"
+                                        } ${togglingBlogId === blog.id ? "opacity-70 cursor-not-allowed" : ""}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (togglingBlogId !== blog.id) {
+                                            handleToggleVisibility(blog);
+                                        }
+                                    }}
+                                    disabled={togglingBlogId === blog.id}
+                                    title={blog.isVisible ? "Click to hide" : "Click to show"}
                                 >
-                                    {blog.isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
-                                </div>
+                                    {togglingBlogId === blog.id ? (
+                                        <Loader2 size={16} className="animate-spin" />
+                                    ) : blog.isVisible ? (
+                                        <Eye size={16} />
+                                    ) : (
+                                        <EyeOff size={16} />
+                                    )}
+                                </button>
                             </div>
 
                             {/* Overlay for hidden blogs */}
@@ -148,8 +196,8 @@ export default function BlogManagementContainer() {
                                 </span>
                                 <span
                                     className={`text-xs font-medium px-2 py-1 rounded-full ${blog.isVisible
-                                            ? "bg-green-100 text-green-700"
-                                            : "bg-gray-100 text-gray-600"
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-600"
                                         }`}
                                 >
                                     {blog.isVisible ? "Visible" : "Hidden"}
