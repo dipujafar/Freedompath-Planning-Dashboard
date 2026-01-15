@@ -1,8 +1,8 @@
 "use client";
-import { Image, Table, Tag, Typography, Space, Tooltip, Avatar, Badge } from "antd";
-import { Eye, Edit, ChevronDown, CheckCircle2, Clock, ShieldCheck, Zap } from "lucide-react";
+import { Image, Table, Tag, Typography, Space, Tooltip, Avatar, Badge, Modal, message } from "antd";
+import { Eye, Edit, ChevronDown, CheckCircle2, Clock, ShieldCheck, Zap, Trash2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useGetServicesQuery } from "@/redux/api/servicesApi";
+import { useGetServicesQuery, useDeleteServiceMutation } from "@/redux/api/servicesApi";
 import { IService, IServiceOption } from "@/types/service.types";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -12,6 +12,30 @@ const { Text, Title } = Typography;
 const ServiceManagementTable = () => {
     const router = useRouter();
     const { data: servicesData, isLoading, isFetching } = useGetServicesQuery();
+    const [deleteService, { isLoading: isDeleting }] = useDeleteServiceMutation();
+
+    // Delete modal state
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [serviceToDelete, setServiceToDelete] = useState<IService | null>(null);
+
+    // Open delete confirmation modal
+    const openDeleteModal = (service: IService) => {
+        setServiceToDelete(service);
+        setDeleteModalOpen(true);
+    };
+
+    // Delete handler
+    const handleDelete = async () => {
+        if (!serviceToDelete) return;
+        try {
+            await deleteService(serviceToDelete.id).unwrap();
+            message.success("Service deleted successfully");
+            setDeleteModalOpen(false);
+            setServiceToDelete(null);
+        } catch (error) {
+            message.error("Failed to delete service");
+        }
+    };
 
     // Icon helper for the features
     const getFeatureIcon = (title: string) => {
@@ -100,9 +124,17 @@ const ServiceManagementTable = () => {
                     <Tooltip title="Edit Service">
                         <div
                             className="cursor-pointer bg-blue-50 p-2 rounded-full hover:bg-blue-100 transition-colors"
-                            onClick={() => router.push(`/service-management/${record.id}`)}
+                            onClick={() => router.push(`/service-management/edit/${record.id}`)}
                         >
                             <Edit size={18} className="text-blue-600" />
+                        </div>
+                    </Tooltip>
+                    <Tooltip title="Delete Service">
+                        <div
+                            className="cursor-pointer bg-red-50 p-2 rounded-full hover:bg-red-100 transition-colors"
+                            onClick={() => openDeleteModal(record)}
+                        >
+                            <Trash2 size={18} className="text-red-600" />
                         </div>
                     </Tooltip>
                 </Space>
@@ -170,12 +202,15 @@ const ServiceManagementTable = () => {
                 rowKey="id"
                 expandable={{
                     expandedRowRender,
-                    expandRowByClick: true,
+                    expandRowByClick: false,
                     expandIcon: ({ expanded, onExpand, record }) => (
                         <ChevronDown
                             size={20}
                             className={`text-slate-400 transition-transform duration-300 cursor-pointer ${expanded ? 'rotate-180' : ''}`}
-                            onClick={(e) => onExpand(record, e as any)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onExpand(record, e as any);
+                            }}
                         />
                     ),
                     columnWidth: 48
@@ -187,6 +222,79 @@ const ServiceManagementTable = () => {
                 }}
                 className="custom-table"
             />
+
+            {/* Professional Delete Confirmation Modal */}
+            <Modal
+                open={deleteModalOpen}
+                onCancel={() => {
+                    setDeleteModalOpen(false);
+                    setServiceToDelete(null);
+                }}
+                footer={null}
+                centered
+                closable={false}
+                width={420}
+                styles={{
+                    mask: {
+                        backdropFilter: 'blur(8px)',
+                        background: 'rgba(0, 0, 0, 0.45)',
+                    },
+                }}
+                className="delete-confirmation-modal"
+            >
+                <div className="flex flex-col items-center text-center py-4">
+                    {/* Warning Icon */}
+                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+                        <AlertTriangle size={32} className="text-red-500" />
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="text-xl font-semibold text-slate-800 mb-2">
+                        Delete Service
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-slate-500 mb-2">
+                        You are about to delete
+                    </p>
+                    <p className="text-slate-800 font-medium mb-4 px-4">
+                        "{serviceToDelete?.serviceName}"
+                    </p>
+                    <p className="text-slate-400 text-sm mb-6">
+                        This action cannot be undone.
+                    </p>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 w-full">
+                        <button
+                            onClick={() => {
+                                setDeleteModalOpen(false);
+                                setServiceToDelete(null);
+                            }}
+                            className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleDelete}
+                            disabled={isDeleting}
+                            className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isDeleting ? (
+                                <>
+                                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                    Deleting...
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 size={16} />
+                                    Delete Service
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };

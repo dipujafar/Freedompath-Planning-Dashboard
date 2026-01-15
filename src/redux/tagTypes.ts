@@ -19,6 +19,7 @@ export const tagTypes = {
   bookResources: "BookResources",
   books: "Books",
   blogs: "Blogs",
+  downloadBooks: "DownloadBooks",
 };
 
 export const tagTypesList = [
@@ -42,5 +43,7 @@ export const tagTypesList = [
   tagTypes.bookResources,
   tagTypes.books,
   tagTypes.blogs,
+  tagTypes.downloadBooks,
 ];
+
 

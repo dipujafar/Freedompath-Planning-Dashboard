@@ -40,7 +40,9 @@ const servicesApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, id) => [{ type: tagTypes.services, id }],
         }),
-        createService: build.mutation<ISingleServiceResponse, any>({
+
+        // Create new service
+        createService: build.mutation<ISingleServiceResponse, FormData>({
             query: (data) => ({
                 url: "/services",
                 method: "POST",
@@ -48,8 +50,40 @@ const servicesApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.services],
         }),
+
+        // Update service
+        updateService: build.mutation<
+            ISingleServiceResponse,
+            { id: string; formData: FormData }
+        >({
+            query: ({ id, formData }) => ({
+                url: `/services/${id}`,
+                method: "PATCH",
+                body: formData,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                tagTypes.services,
+                { type: tagTypes.services, id },
+            ],
+        }),
+
+        // Delete service
+        deleteService: build.mutation<void, string>({
+            query: (id) => ({
+                url: `/services/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [tagTypes.services],
+        }),
     }),
 });
 
-export const { useGetServicesQuery, useGetSingleServiceQuery, useCreateServiceMutation } = servicesApi;
+export const {
+    useGetServicesQuery,
+    useGetSingleServiceQuery,
+    useCreateServiceMutation,
+    useUpdateServiceMutation,
+    useDeleteServiceMutation,
+} = servicesApi;
+
 
