@@ -37,6 +37,7 @@ const bookSchema = z.object({
         .string()
         .min(1, "Book details are required")
         .max(5000, "Book details must be less than 5000 characters"),
+    url: z.string().min(1, "Book link is required"),
 });
 
 type BookFormValues = z.infer<typeof bookSchema>;
@@ -55,6 +56,7 @@ const AddBookForm = () => {
             name: "",
             price: "",
             details: "",
+            url: "",
         },
     });
 
@@ -85,6 +87,7 @@ const AddBookForm = () => {
             name: data.name,
             price: Number(data.price),
             details: data.details,
+            url: data.url,
         };
 
         formData.append("data", JSON.stringify(jsonData));
@@ -155,6 +158,24 @@ const AddBookForm = () => {
                                     <Input
                                         type="number"
                                         placeholder="Enter Book Price"
+                                        {...field}
+                                        className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Book Link</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter Book Link"
                                         {...field}
                                         className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
                                     />

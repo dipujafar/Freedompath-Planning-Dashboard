@@ -133,6 +133,11 @@
   width: 0px;
 }
 
+.ant-popconfirm-buttons > .ant-btn-variant-solid{
+  background-color: red !important;
+  color: #fff !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

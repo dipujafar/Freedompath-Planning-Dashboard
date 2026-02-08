@@ -1,12 +1,15 @@
 "use client";;
-import { Image as AntImage, TableProps } from "antd";
+import { Popconfirm, PopconfirmProps, TableProps } from "antd";
 import Image from "next/image";
 import DataTable from "@/utils/DataTable";
-import { Eye, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import pdf_image from "@/assets/image/pdf_image.png"
-import resourceImage from "@/assets/image/resources_image.png";
+import { useDeleteReportMutation, useGetReportQuery } from "@/redux/api/generateReportApi";
+import moment from "moment";
+import { toast } from "sonner";
+
 
 type TDataType = {
     key?: number;
@@ -15,23 +18,36 @@ type TDataType = {
     email: string;
     link: string;
     date: string;
-    price: string
+    pdf: string;
+    id: string;
 };
 
-const data: TDataType[] = Array.from({ length: 8 }).map((_, inx) => ({
-    key: inx,
-    serial: inx + 1,
-    name: "Sarah Johnson",
-    email: "sarah.johnson@email.com",
-    link: "#",
-    date: "11 Sep, 2025",
-    price: "$30"
-}));
+
 
 
 
 const ReportsManagementTable = () => {
-    const router = useRouter();
+
+    const page = useSearchParams().get("page") || "1";
+    const limit = useSearchParams().get("limit") || "10";
+
+    const queries: Record<string, string> = {};
+
+    if (page) queries["page"] = page;
+    if (limit) queries["limit"] = limit;
+
+    const { data: reportsData, isLoading } = useGetReportQuery(queries);
+    const [deleteReport] = useDeleteReportMutation();
+
+    const confirm = async (id: string) => {
+        try {
+            await deleteReport(id).unwrap();
+            toast.success("Report deleted successfully");
+        } catch (error: any) {
+            toast.error(error?.data?.message);
+        }
+    };
+
 
     const columns: TableProps<TDataType>["columns"] = [
         {
@@ -45,21 +61,33 @@ const ReportsManagementTable = () => {
         },
         {
             title: "Created Date",
-            dataIndex: "date",
+            dataIndex: "createdAt",
+            render: (text) => moment(text).format("lll")
         },
         {
             title: "Action",
             dataIndex: "action",
             align: "center",
-           render: (_, record) => <Link href={record.link} target="_blank" className="flex-center gap-x-1 cursor-pointer">
-                <Image src={pdf_image} alt="service" width={25} height={25} className="object-cover rounded-2xl" />,
-                <div><Trash2 color="red" /></div>
-            </Link>
+            render: (_, record) => <div className="flex-center gap-x-2 cursor-pointer">
+                <Link href={record?.pdf} target="_blank" className="flex-center gap-x-1 cursor-pointer">
+                    <Image src={pdf_image} alt="service" width={25} height={25} className="object-cover rounded-2xl" />
+                </Link>
+                <Popconfirm
+                    title="Delete the task"
+                    description="Are you sure to delete this task?"
+                    onConfirm={() => confirm(record?.id)}
+                    okText="Yes"
+                    cancelText="No"
+                >
+                    <div><Trash2 color="red" /></div>
+                </Popconfirm>
+
+            </div>
         },
     ];
 
     return (
-        <DataTable columns={columns} data={data} pageSize={40}></DataTable>
+        <DataTable columns={columns} data={reportsData?.data?.data} isLoading={isLoading} pageSize={Number(limit)} total={reportsData?.data?.meta?.total}></DataTable>
     );
 };
 

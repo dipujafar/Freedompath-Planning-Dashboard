@@ -1,3 +1,5 @@
+import { report } from "process";
+
 export const tagTypes = {
   auth: "Auth",
   terms: "Terms",
@@ -20,6 +22,7 @@ export const tagTypes = {
   books: "Books",
   blogs: "Blogs",
   downloadBooks: "DownloadBooks",
+  reports: "Reports",
 };
 
 export const tagTypesList = [
@@ -44,6 +47,7 @@ export const tagTypesList = [
   tagTypes.books,
   tagTypes.blogs,
   tagTypes.downloadBooks,
+  tagTypes.reports,
 ];
 
 
