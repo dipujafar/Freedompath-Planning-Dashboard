@@ -1,113 +1,236 @@
-import { Eye, EyeOff, SquarePen, Trash2 } from 'lucide-react';
-import Image from 'next/image';
-import React from 'react'
+"use client";
 
-export const blogPosts = [
-    {
-        id: 1,
-        title: "Most popular design systems to learn from in 2022",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 2,
-        title: "Understanding accessibility makes you a better",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 3,
-        title: "15 best tools that will help you build your website",
-        tag: "Tech",
-        image: "/blog_image_3.png",
-    },
-    {
-        id: 4,
-        title: "Understanding accessibility makes you a better",
-        tag: "Tech",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 5,
-        title: "How to build scalable design systems",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 6,
-        title: "Top accessibility mistakes beginners make",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 7,
-        title: "Best 10 frameworks to learn in 2024",
-        tag: "Tech",
-        image: "/blog_image_3.png",
-    },
-    {
-        id: 8,
-        title: "Improving UI consistency with token systems",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 9,
-        title: "Why inclusive design matters",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    },
-    {
-        id: 10,
-        title: "Top VS Code extensions for productivity",
-        tag: "Tech",
-        image: "/blog_image_3.png",
-    },
-    {
-        id: 11,
-        title: "Building color palettes for design systems",
-        tag: "Design Systems",
-        image: "/blog_image_1.png",
-    },
-    {
-        id: 12,
-        title: "Keyboard navigation: what devs should know",
-        tag: "Accessibility",
-        image: "/blog_image_2.png",
-    }
-];
+import { Eye, EyeOff, SquarePen, Trash2, Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Spin, Modal } from "antd";
+import {
+    useGetBlogsQuery,
+    useDeleteBlogMutation,
+    useUpdateBlogMutation,
+} from "@/redux/api/blogsApi";
+import { IBlog } from "@/types/blog.types";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export default function BlogManagementContainer() {
-    return (
-        <div className="grid xl:grid-cols-4 lg:grid-cols-3 grid-cols-1 xl:gap-9 md:gap-5 gap-3">
-            {
-                blogPosts?.map((service, index) => (
-                    <div key={service?.id} className='relative'>
+    const router = useRouter();
+    const { data: blogsData, isLoading, isError } = useGetBlogsQuery();
+    const [deleteBlog, { isLoading: isDeleting }] = useDeleteBlogMutation();
+    const [updateBlog] = useUpdateBlogMutation();
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
+    const [togglingBlogId, setTogglingBlogId] = useState<string | null>(null);
 
-                        <div key={service?.id} className="lg:space-y-6 md:space-y-4 space-y-2.5 group cursor-pointer ">
-                            <Image src={service?.image} alt="service-image" width={300} height={300} className="w-full rounded-2xl" />
-                            <div className="lg:space-y-1.5 space-y-1">
-                                <h1 className="xl:text-xl md:text-lg font-semibold xl:leading-7 leading-6">{service?.title}</h1>
-                                <p className="text-main-color font-medium">{service?.tag}</p>
-                            </div>
-                        </div>
-                        <div className='absolute top-2 right-2 flex gap-x-2.5 z-20'>
-                            <div className='size-8 bg-green-500 flex-center text-white rounded-full cursor-pointer'>
-                                <SquarePen size={20} />
-                            </div>
-                            <div className='size-8 bg-red-500 flex-center text-white rounded-full cursor-pointer'>
-                                <Trash2 size={20} />
-                            </div>
-                            <div className='size-8 bg-black flex-center text-white rounded-full cursor-pointer'>
-                                {index  === 2 ? <EyeOff size={20} /> : <Eye size={20} />}
-                            </div>
-                        </div>
-                        {index  === 2 && <div className='absolute inset-0 bg-black/20 rounded-2xl z-10'/>}
+    const handleDeleteClick = (blogId: string) => {
+        setSelectedBlogId(blogId);
+        setDeleteModalOpen(true);
+    };
 
-                        
-                    </div>
-                ))
+    const handleToggleVisibility = async (blog: IBlog) => {
+        setTogglingBlogId(blog.id);
+
+        const formData = new FormData();
+        const jsonData = {
+            title: blog.title,
+            subTitle: blog.subTitle,
+            details: blog.details,
+            isVisible: !blog.isVisible,
+            image: blog.image,
+        };
+        formData.append("data", JSON.stringify(jsonData));
+
+        try {
+            const result = await updateBlog({
+                id: blog.id,
+                formData,
+            }).unwrap();
+
+            if (result.success) {
+                toast.success(
+                    `Blog ${!blog.isVisible ? "is now visible" : "has been hidden"}`
+                );
             }
-        </div>
-    )
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to update visibility");
+        } finally {
+            setTogglingBlogId(null);
+        }
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!selectedBlogId) return;
+
+        try {
+            const result = await deleteBlog(selectedBlogId).unwrap();
+            if (result.success) {
+                toast.success("Blog deleted successfully!");
+            }
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to delete blog");
+        } finally {
+            setDeleteModalOpen(false);
+            setSelectedBlogId(null);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center py-20 text-red-500">
+                Failed to load blogs. Please try again.
+            </div>
+        );
+    }
+
+    const blogs = blogsData?.data?.data || [];
+
+    if (blogs.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <p className="text-lg font-medium">No blogs found</p>
+                <p className="text-sm mt-2">Create your first blog to get started.</p>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 xl:gap-6 md:gap-5 gap-4">
+                {blogs.map((blog: IBlog) => (
+                    <div
+                        key={blog.id}
+                        className={`relative group bg-white rounded-2xl overflow-hidden shadow-sm border border-border-color hover:shadow-md transition-all duration-300 ${!blog.isVisible ? "opacity-60 grayscale-[20%]" : ""
+                            }`}
+                    >
+                        {/* Image Container */}
+                        <div
+                            className="relative w-full aspect-[4/3] overflow-hidden cursor-pointer"
+                            onClick={() => router.push(`/blog-management/${blog.id}`)}
+                        >
+                            <Image
+                                src={blog.image || "/blog_image_1.png"}
+                                alt={blog.title}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.src = "/blog_image_1.png";
+                                }}
+                            />
+
+                            {/* Action Buttons - positioned on image */}
+                            <div className="absolute top-3 right-3 flex gap-2 z-20">
+                                <button
+                                    className="size-9 bg-green-500 flex items-center justify-center text-white rounded-full cursor-pointer hover:bg-green-600 transition-all duration-200 shadow-lg hover:scale-110"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        router.push(`/blog-management/edit/${blog.id}`);
+                                    }}
+                                    title="Edit Blog"
+                                >
+                                    <SquarePen size={16} />
+                                </button>
+                                <button
+                                    className="size-9 bg-red-500 flex items-center justify-center text-white rounded-full cursor-pointer hover:bg-red-600 transition-all duration-200 shadow-lg hover:scale-110"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteClick(blog.id);
+                                    }}
+                                    title="Delete Blog"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                                <button
+                                    className={`size-9 flex items-center justify-center text-white rounded-full shadow-lg cursor-pointer transition-all duration-200 hover:scale-110 ${blog.isVisible
+                                        ? "bg-blue-500 hover:bg-blue-600"
+                                        : "bg-gray-500 hover:bg-gray-600"
+                                        } ${togglingBlogId === blog.id ? "opacity-70 cursor-not-allowed" : ""}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (togglingBlogId !== blog.id) {
+                                            handleToggleVisibility(blog);
+                                        }
+                                    }}
+                                    disabled={togglingBlogId === blog.id}
+                                    title={blog.isVisible ? "Click to hide" : "Click to show"}
+                                >
+                                    {togglingBlogId === blog.id ? (
+                                        <Loader2 size={16} className="animate-spin" />
+                                    ) : blog.isVisible ? (
+                                        <Eye size={16} />
+                                    ) : (
+                                        <EyeOff size={16} />
+                                    )}
+                                </button>
+                            </div>
+
+                            {/* Overlay for hidden blogs */}
+                            {!blog.isVisible && (
+                                <div className="absolute inset-0 bg-black/30 z-10 pointer-events-none" />
+                            )}
+                        </div>
+
+                        {/* Content */}
+                        <div
+                            className="p-4 cursor-pointer"
+                            onClick={() => router.push(`/blog-management/${blog.id}`)}
+                        >
+                            <h2 className="text-lg font-semibold text-gray-900 line-clamp-2 leading-snug mb-2">
+                                {blog.title}
+                            </h2>
+                            <p className="text-main-color font-medium text-sm line-clamp-1 mb-3">
+                                {blog.subTitle}
+                            </p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-500 flex items-center gap-1.5">
+                                    <Eye size={14} />
+                                    {blog.view} views
+                                </span>
+                                <span
+                                    className={`text-xs font-medium px-2 py-1 rounded-full ${blog.isVisible
+                                        ? "bg-green-100 text-green-700"
+                                        : "bg-gray-100 text-gray-600"
+                                        }`}
+                                >
+                                    {blog.isVisible ? "Visible" : "Hidden"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Delete Confirmation Modal */}
+            <Modal
+                title="Delete Blog"
+                open={deleteModalOpen}
+                onOk={handleDeleteConfirm}
+                onCancel={() => {
+                    setDeleteModalOpen(false);
+                    setSelectedBlogId(null);
+                }}
+                okText="Delete"
+                okButtonProps={{
+                    danger: true,
+                    loading: isDeleting,
+                }}
+                cancelButtonProps={{
+                    disabled: isDeleting,
+                }}
+            >
+                <p>
+                    Are you sure you want to delete this blog? This action cannot be
+                    undone.
+                </p>
+            </Modal>
+        </>
+    );
 }

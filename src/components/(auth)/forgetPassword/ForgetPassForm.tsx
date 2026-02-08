@@ -1,9 +1,10 @@
 "use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail } from "lucide-react";
+import { Mail, Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -15,6 +16,8 @@ import {
 import LogoSection from "../LogoSection";
 import { ForgetPassFormValues, forgetPassSchema } from "./Schema";
 import { useRouter } from "next/navigation";
+import { useForgotPasswordMutation } from "@/redux/api/authApi";
+import { toast } from "sonner";
 
 export function ForgetPassForm() {
   const form = useForm<ForgetPassFormValues>({
@@ -25,8 +28,22 @@ export function ForgetPassForm() {
   });
   const router = useRouter();
 
-  const onSubmit = (values: ForgetPassFormValues) => {
-    router.push("/verify-email");
+  const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
+
+  const onSubmit = async (values: ForgetPassFormValues) => {
+    try {
+      const result = await forgotPassword({ email: values.emailOrPhone }).unwrap();
+
+      if (result.success) {
+        toast.success(result.message || "OTP sent to your email!");
+        // Store email in sessionStorage for the verify page
+        sessionStorage.setItem("resetEmail", values.emailOrPhone);
+        sessionStorage.setItem("resetToken", result.data.token);
+        router.push("/verify-email");
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to send OTP. Please try again.");
+    }
   };
 
   return (
@@ -63,7 +80,7 @@ export function ForgetPassForm() {
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                         <Input
-                          type="text"
+                          type="email"
                           placeholder="Enter your email"
                           className="pl-10 h-12 border-gray-300 focus:border-main-color focus:ring-main-color"
                           {...field}
@@ -78,9 +95,17 @@ export function ForgetPassForm() {
               {/* Login Button */}
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full h-12 bg-main-color hover:bg-red-700 text-white font-medium text-base"
               >
-                Send OTP
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending OTP...
+                  </>
+                ) : (
+                  "Send OTP"
+                )}
               </Button>
             </form>
           </Form>

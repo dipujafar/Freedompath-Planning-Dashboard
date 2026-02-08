@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice } from "@reduxjs/toolkit";
+import { IAuthState, IUser } from "@/types/auth.types";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
-const initialState = {
+const initialState: IAuthState = {
   user: null,
   token: null,
 };
@@ -11,7 +11,10 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setUser: (state, action) => {
+    setUser: (
+      state,
+      action: PayloadAction<{ user: IUser; token: string }>
+    ) => {
       const { user, token } = action.payload;
 
       state.user = user;
@@ -34,9 +37,9 @@ const authSlice = createSlice({
   },
 });
 
-// selectors
-export const selectUser = (state: any) => state.auth.user;
-export const selectToken = (state: any) => state.auth.token;
+// Typed selectors - using inline type to avoid circular dependency with store
+export const selectUser = (state: { auth: IAuthState }) => state.auth.user;
+export const selectToken = (state: { auth: IAuthState }) => state.auth.token;
 
 export const { setUser, logout } = authSlice.actions;
 

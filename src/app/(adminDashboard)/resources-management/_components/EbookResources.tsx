@@ -1,75 +1,135 @@
-"use client";;
-import { Image as AntImage, TableProps } from "antd";
+"use client";
+
+import { Image as AntImage, TableProps, Spin } from "antd";
 import Image from "next/image";
 import DataTable from "@/utils/DataTable";
-import { Eye } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import pdf_image from "@/assets/image/pdf_image.png"
+import pdf_image from "@/assets/image/pdf_image.png";
+import { useGetBookResourcesQuery } from "@/redux/api/bookResourcesApi";
+import { IBookResource } from "@/types/resource.types";
+import dayjs from "dayjs";
 
 type TDataType = {
-    key?: number;
+    key: string;
+    id: string;
     serial: number;
     name: string;
-    subtitle: string;
-    link: string;
-    date: string;
+    details: string;
+    image: string;
+    file: string;
+    createdAt: string;
 };
-
-const data: TDataType[] = Array.from({ length: 8 }).map((_, inx) => ({
-    key: inx,
-    serial: inx + 1,
-    name: "The Definitive Guide",
-    subtitle: "Complete guide to digital marketing strategies and modern techniques for business growth.",
-    link: "#",
-    date: "11 Sep, 2025",
-}));
-
-
 
 const EbookResources = () => {
     const router = useRouter();
+    const { data: bookResourcesData, isLoading, isError } = useGetBookResourcesQuery();
+
+    // Transform API data to table format
+    const tableData: TDataType[] =
+        bookResourcesData?.data?.data?.map((resource: IBookResource, index: number) => ({
+            key: resource.id,
+            id: resource.id,
+            serial: index + 1,
+            name: resource.name,
+            details: resource.details,
+            image: resource.image,
+            file: resource.file,
+            createdAt: dayjs(resource.createdAt).format("DD MMM, YYYY"),
+        })) || [];
 
     const columns: TableProps<TDataType>["columns"] = [
         {
-            title: "Book name",
+            title: "Book Name",
             dataIndex: "name",
             align: "center",
-            render: (text) => <div className="flex justify-center items-center gap-x-2">
-                <AntImage src={"/book_image.png"} alt="e-book_image" width={60} height={60} className="object-cover rounded-2xl" />
-                <p>{text}</p>
-            </div>
+            render: (text: string, record) => (
+                <div className="flex justify-center items-center gap-x-2">
+                    <AntImage
+                        src={record.image || "/book_image.png"}
+                        alt="e-book_image"
+                        width={60}
+                        height={60}
+                        className="object-cover rounded-2xl"
+                        fallback="/book_image.png"
+                    />
+                    <p className="font-medium">{text}</p>
+                </div>
+            ),
         },
         {
-            title: "Book Sub Title",
-            dataIndex: "subtitle",
-            render: (text) => <p className="max-w-[400px]">{text}</p>,
+            title: "Book Details",
+            dataIndex: "details",
+            render: (text: string) => (
+                <p className="max-w-[400px] truncate" title={text}>
+                    {text}
+                </p>
+            ),
         },
         {
             title: "Listing Date",
-            dataIndex: "date",
+            dataIndex: "createdAt",
         },
         {
-            title: "Book pdf",
-            dataIndex: "date",
+            title: "Book PDF",
+            dataIndex: "file",
             align: "center",
-            render: (_, record) => <Link href={record.link} target="_blank" className="flex-center cursor-pointer">
-                <Image src={pdf_image} alt="service" width={25} height={25} className="object-cover rounded-2xl" />,
-            </Link>
+            render: (_, record) => (
+                <Link
+                    href={record.file}
+                    target="_blank"
+                    className="flex-center cursor-pointer"
+                >
+                    <Image
+                        src={pdf_image}
+                        alt="pdf file"
+                        width={25}
+                        height={25}
+                        className="object-cover rounded-2xl"
+                    />
+                </Link>
+            ),
         },
-
         {
             title: "Action",
             dataIndex: "action",
             render: (_, record) => (
-                <Eye size={22} color="#78C0A8" onClick={() => router.push(`/testimonial-management/add-testimonial`)} className="cursor-pointer" />
+                <div className="flex items-center gap-3">
+                    <Eye
+                        size={22}
+                        color="#78C0A8"
+                        onClick={() => router.push(`/resources-management/book/${record.id}`)}
+                        className="cursor-pointer hover:opacity-70 transition-opacity"
+                    />
+                    <Pencil
+                        size={20}
+                        color="#4378A8"
+                        onClick={() => router.push(`/resources-management/edit-book/${record.id}`)}
+                        className="cursor-pointer hover:opacity-70 transition-opacity"
+                    />
+                </div>
             ),
         },
     ];
 
-    return (
-        <DataTable columns={columns} data={data} pageSize={40}></DataTable>
-    );
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center py-20 text-red-500">
+                Failed to load book resources. Please try again.
+            </div>
+        );
+    }
+
+    return <DataTable columns={columns} data={tableData} pageSize={10} />;
 };
 
 export default EbookResources;

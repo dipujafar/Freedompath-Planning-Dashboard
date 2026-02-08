@@ -1,56 +1,79 @@
+import {
+  ILoginRequest,
+  ILoginResponse,
+  IForgotPasswordResponse,
+  IVerifyOtpResponse,
+  IResendOtpResponse,
+  IChangePasswordResponse,
+  IChangePasswordRequest,
+} from "@/types/auth.types";
 import { tagTypes } from "../tagTypes";
 import { baseApi } from "./baseApi";
 
 const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-   
-    login: build.mutation({
-      query: (data) => ({
+    // Login
+    login: build.mutation<ILoginResponse, ILoginRequest>({
+      query: (credentials) => ({
         url: "/auth/login",
         method: "POST",
-        body: data,
+        body: credentials,
       }),
       invalidatesTags: [tagTypes.auth],
     }),
-    forgetPassword: build.mutation({
+
+    // Forgot password - sends OTP to email
+    forgotPassword: build.mutation<IForgotPasswordResponse, { email: string }>({
       query: (data) => ({
         url: "/auth/forgot-password",
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: [tagTypes.auth],
     }),
-    verifyOtp: build.mutation({
-      query: (data) => ({
+
+    // Verify OTP - requires token from forgot password in header
+    verifyOtp: build.mutation<
+      IVerifyOtpResponse,
+      { otp: string; token: string }
+    >({
+      query: ({ otp, token }) => ({
         url: "/otp/verify-otp",
+        method: "POST",
+        body: { otp },
+        headers: {
+          token: token,
+        },
+      }),
+    }),
+
+    // Resend OTP
+    resendOtp: build.mutation<IResendOtpResponse, { email: string }>({
+      query: (data) => ({
+        url: "/otp/resend-otp",
         method: "POST",
         body: data,
       }),
-      invalidatesTags: [tagTypes.auth],
     }),
-    resetPassword: build.mutation({
-      query: (data) => ({
-        url: "/auth/reset-password",
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: [tagTypes.auth],
-    }),
-    changePassword: build.mutation({
+
+    // Change password (for resetting after OTP verification)
+    changePassword: build.mutation<
+      IChangePasswordResponse,
+      IChangePasswordRequest
+    >({
       query: (data) => ({
         url: "/auth/change-password",
         method: "PATCH",
         body: data,
       }),
       invalidatesTags: [tagTypes.auth],
-    })
+    }),
   }),
 });
 
 export const {
   useLoginMutation,
-  useForgetPasswordMutation,
+  useForgotPasswordMutation,
   useVerifyOtpMutation,
-  useResetPasswordMutation,
-  useChangePasswordMutation
+  useResendOtpMutation,
+  useChangePasswordMutation,
 } = authApi;

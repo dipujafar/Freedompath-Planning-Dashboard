@@ -1,69 +1,46 @@
-import review_client_1 from "@/assets/image/review_client1.png"
-import review_client_2 from "@/assets/image/review_client2.png"
-import TestimonialCard from "./TestimonialCard"
-const reviewData = [
-    {
-        id: 1,
-        name: "Jenny Wilson",
-        comment: "We love Landingfolio! Our designers were using it for their projects, so we already knew what kind of design they want.",
-        image: review_client_1,
-        org: "Grower.io",
-        rating: 5
-    },
-    {
-        id: 2,
-        name: "Jenny Wilson",
-        comment: "We love Landingfolio! Our designers were using it for their projects, so we already knew what kind of design they want.",
-        image: review_client_2,
-        org: "DLDesign.co",
-        rating: 5
-    },
-    {
-        id: 3,
-        name: "Jenny Wilson",
-        comment: "We love Landingfolio! Our designers were using it for their projects, so we already knew what kind of design they want.",
-        image: review_client_1,
-        org: "Grower.io",
-        rating: 5
-    },
-    {
-        id: 4,
-        name: "Jenny Wilson",
-        comment: "We love Landingfolio! Our designers were using it for their projects, so we already knew what kind of design they want.",
-        image: review_client_2,
-        org: "DLDesign.co",
-        rating: 5
-    },
-    {
-        id: 5,
-        name: "Jenny Wilson",
-        comment: "We love Landingfolio! Our designers were using it for their projects, so we already knew what kind of design they want.",
-        image: review_client_2,
-        org: "DLDesign.co",
-        rating: 5
-    },
-    {
-        id: 6,
-        name: "Jenny Wilson",
-        comment: "We love Landingfolio! Our designers were using it for their projects, so we already knew what kind of design they want.",
-        image: review_client_1,
-        org: "Grower.io",
-        rating: 5
-    },
+"use client";
 
-]
+import TestimonialCard from "./TestimonialCard";
+import { useGetTestimonialsQuery } from "@/redux/api/testimonialsApi";
+import { Spin } from "antd";
+import { ITestimonial } from "@/types/testimonial.types";
 
+export default function TestimonialManagementContainer() {
+    const { data: testimonialsData, isLoading, isError } = useGetTestimonialsQuery();
 
-export default function ClientReviewCarousel() {
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Spin size="large" />
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex items-center justify-center py-20 text-red-500">
+                Failed to load testimonials. Please try again.
+            </div>
+        );
+    }
+
+    const testimonials = testimonialsData?.data?.data || [];
+
+    if (testimonials.length === 0) {
+        return (
+            <div className="flex items-center justify-center py-20 text-muted-foreground">
+                No testimonials found. Add your first testimonial!
+            </div>
+        );
+    }
+
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {
-                reviewData.map((review) => <div
-                    key={review?.id}
-                >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {testimonials.map((review: ITestimonial) => (
+                <div key={review.id}>
                     <TestimonialCard review={review} />
-                </div>)
-            }
+                </div>
+            ))}
         </div>
-    )
+    );
 }
