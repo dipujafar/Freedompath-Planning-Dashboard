@@ -59,6 +59,7 @@ const formSchema = z.object({
   businessOwnerImage: z.any().optional(),
   businessOwnerTitle: z.string().min(1, "Title is required"),
   businessOwnerBio: z.string().min(1, "Bio is required"),
+  sectionTitle: z.string().min(1, "Section Title is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -101,6 +102,7 @@ export function AboutUsForm() {
       businessOwnerImage: null,
       businessOwnerTitle: "",
       businessOwnerBio: "",
+      sectionTitle: "",
     },
   });
 
@@ -149,6 +151,7 @@ export function AboutUsForm() {
       const steve = steveData.data;
       form.setValue("businessOwnerTitle", steve.title);
       form.setValue("businessOwnerBio", steve.bio);
+      form.setValue("sectionTitle", steve?.sectionTitle);
       if (steve.banner) {
         setBusinessOwnerImagePreview(steve.banner);
       }
@@ -270,8 +273,10 @@ export function AboutUsForm() {
     const formData = new FormData();
 
     const data = {
+
       title: values.businessOwnerTitle,
       bio: values.businessOwnerBio,
+      sectionTitle: values.sectionTitle
     };
 
     formData.append("data", JSON.stringify(data));
@@ -690,6 +695,25 @@ export function AboutUsForm() {
             <div className="space-y-6">
               <h2 className="text-lg font-semibold text-black/70">Business Owner</h2>
 
+              
+              <FormField
+                control={form.control}
+                name="sectionTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Section Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Section Title"
+                        {...field}
+                        className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="businessOwnerImage"
@@ -744,7 +768,7 @@ export function AboutUsForm() {
                 name="businessOwnerTitle"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter Title"

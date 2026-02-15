@@ -23,6 +23,8 @@ export const tagTypes = {
   blogs: "Blogs",
   downloadBooks: "DownloadBooks",
   reports: "Reports",
+  footerSection: "FooterSection",
+  
 };
 
 export const tagTypesList = [
@@ -48,6 +50,7 @@ export const tagTypesList = [
   tagTypes.blogs,
   tagTypes.downloadBooks,
   tagTypes.reports,
+  tagTypes.footerSection,
 ];
 
 

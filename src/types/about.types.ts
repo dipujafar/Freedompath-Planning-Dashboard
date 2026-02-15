@@ -70,6 +70,7 @@ export interface IAboutSteveDeray {
     key: string;
     title: string;
     bio: string;
+    sectionTitle: string;
     banner: string;
     createdAt: string;
     updatedAt: string;

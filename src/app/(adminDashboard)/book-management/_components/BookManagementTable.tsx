@@ -64,9 +64,9 @@ const BookManagementTable = () => {
             title: "Book Details",
             dataIndex: "details",
             render: (text: string) => (
-                <p className="max-w-[300px] truncate" title={text}>
-                    {text}
-                </p>
+                <p className="max-w-[300px] truncate" dangerouslySetInnerHTML={{
+                    __html: text
+                }} title={text}></p>
             ),
         },
         {

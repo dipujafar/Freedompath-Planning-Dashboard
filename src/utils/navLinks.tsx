@@ -60,6 +60,11 @@ export const navLinks = [
     label: <Link href={"/reports-management"}>Reports Management</Link>,
   },
   {
+    key: "footer-management",
+    icon: <BookmarkCheck size={18} />,
+    label: <Link href={"/footer-management"}>Footer Management</Link>,
+  },
+  {
     key: "settings",
     icon: <IoSettingsOutline size={18} />,
     label: <Link href={"/settings"}>Settings</Link>,
