@@ -66,6 +66,21 @@ const testimonialsApi = baseApi.injectEndpoints({
                 { type: tagTypes.testimonials, id },
             ],
         }),
+        // Update testimonial status
+        updateTestimonialStatus: build.mutation<
+            ISingleTestimonialResponse,
+            { id: string; data: { isVisible: boolean } }
+        >({
+            query: ({ id, data }) => ({
+                url: `/testimonial/${id}`,
+                method: "PATCH",
+                body: data,
+            }),
+            invalidatesTags: (result, error, { id }) => [
+                tagTypes.testimonials,
+                { type: tagTypes.testimonials, id },
+            ],
+        }),
 
         // Delete testimonial
         deleteTestimonial: build.mutation<ISingleTestimonialResponse, string>({
@@ -83,6 +98,7 @@ export const {
     useGetSingleTestimonialQuery,
     useCreateTestimonialMutation,
     useUpdateTestimonialMutation,
+    useUpdateTestimonialStatusMutation,
     useDeleteTestimonialMutation,
 } = testimonialsApi;
 

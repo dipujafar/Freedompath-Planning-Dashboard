@@ -16,7 +16,8 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+
+import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import {
     useCreateTestimonialMutation,
@@ -24,6 +25,7 @@ import {
 } from "@/redux/api/testimonialsApi";
 import { toast } from "sonner";
 import { ITestimonial } from "@/types/testimonial.types";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 
 const formSchema = z.object({
     clientName: z.string().min(1, "Client name is required"),
@@ -31,6 +33,7 @@ const formSchema = z.object({
     clientPhoto: z.any().optional(),
     description: z.string().min(10, "Description must be at least 10 characters"),
     rating: z.number().min(1, "Please select a rating").max(5),
+    isVisible: z.boolean().default(true),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -60,12 +63,13 @@ export function TestimonialForm({
     const isLoading = isCreating || isUpdating;
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             clientName: "",
             designation: "",
             description: "",
             rating: 0,
+            isVisible: true,
         },
     });
 
@@ -76,6 +80,7 @@ export function TestimonialForm({
             form.setValue("designation", initialData.designation);
             form.setValue("description", initialData.description);
             form.setValue("rating", initialData.rating);
+            form.setValue("isVisible", initialData.isVisible);
             if (initialData.clientPhoto) {
                 setExistingPhoto(initialData.clientPhoto);
             }
@@ -126,12 +131,14 @@ export function TestimonialForm({
             designation: string;
             description: string;
             rating: number;
+            isVisible: boolean;
             clientPhoto?: string;
         } = {
             clientName: values.clientName,
             designation: values.designation,
             description: values.description,
             rating: values.rating,
+            isVisible: values.isVisible,
         };
 
         // For edit mode, include existing photo URL if no new file
@@ -192,7 +199,7 @@ export function TestimonialForm({
 
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
+                        <FormField<FormValues>
                             control={form.control}
                             name="clientName"
                             render={({ field }) => (
@@ -210,7 +217,7 @@ export function TestimonialForm({
                             )}
                         />
 
-                        <FormField
+                        <FormField<FormValues>
                             control={form.control}
                             name="designation"
                             render={({ field }) => (
@@ -228,7 +235,7 @@ export function TestimonialForm({
                             )}
                         />
 
-                        <FormField
+                        <FormField<FormValues>
                             control={form.control}
                             name="clientPhoto"
                             render={({ field: { onChange, value, ...field } }) => (
@@ -294,17 +301,38 @@ export function TestimonialForm({
                             )}
                         />
 
-                        <FormField
+                        <FormField<FormValues>
+                            control={form.control}
+                            name="isVisible"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border border-[#E1E1E1] p-4 bg-[#F9FAFB]">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base">Visibility Status</FormLabel>
+                                        <div className="text-sm text-muted-foreground">
+                                            Control whether this testimonial is visible on the public site
+                                        </div>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField<FormValues>
                             control={form.control}
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Comment</FormLabel>
                                     <FormControl>
-                                        <Textarea
+                                        <RichTextEditor
+                                            value={field.value}
+                                            onChange={field.onChange}
                                             placeholder="Enter the comment which client says"
-                                            className="min-h-[120px] resize-none border border-[#E1E1E1] bg-[#F9FAFB]"
-                                            {...field}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -312,7 +340,7 @@ export function TestimonialForm({
                             )}
                         />
 
-                        <FormField
+                        <FormField<FormValues>
                             control={form.control}
                             name="rating"
                             render={({ field }) => (
@@ -331,8 +359,8 @@ export function TestimonialForm({
                                                 >
                                                     <Star
                                                         className={`h-6 w-6 ${star <= (hoveredStar || currentRating)
-                                                                ? "fill-[#3673DE] text-[#3673DE]"
-                                                                : "fill-none text-muted-foreground"
+                                                            ? "fill-[#3673DE] text-[#3673DE]"
+                                                            : "fill-none text-muted-foreground"
                                                             }`}
                                                     />
                                                 </button>
