@@ -4,8 +4,12 @@ import StatCard from "@/components/(adminDashboard)/cards/statCard";
 import { useGetDashboardCardsQuery } from "@/redux/api/dashboardApi";
 import { Spin } from "antd";
 
-export default function StatContainer() {
-  const { data: cardsData, isLoading, isError } = useGetDashboardCardsQuery();
+interface StatContainerProps {
+  selectedYear: string;
+}
+
+export default function StatContainer({ selectedYear }: StatContainerProps) {
+  const { data: cardsData, isLoading, isError } = useGetDashboardCardsQuery(selectedYear);
 
   if (isLoading) {
     return (

@@ -41,6 +41,7 @@ const bookSchema = z.object({
         .string()
         .min(1, "Book details are required")
         .max(5000, "Book details must be less than 5000 characters"),
+    url: z.string().min(1, "Book link is required"),
 });
 
 type BookFormValues = z.infer<typeof bookSchema>;
@@ -70,6 +71,7 @@ const EditBookPage = () => {
             name: "",
             price: "",
             details: "",
+            url: "",
         },
     });
 
@@ -80,6 +82,7 @@ const EditBookPage = () => {
             form.setValue("name", book.name);
             form.setValue("price", book.price.toString());
             form.setValue("details", book.details);
+            form.setValue("url", book.url || "");
             if (book.image) {
                 setExistingImage(book.image);
             }
@@ -125,12 +128,14 @@ const EditBookPage = () => {
             name: string;
             price: number;
             details: string;
+            url: string;
             image?: string;
             file?: string;
         } = {
             name: data.name,
             price: Number(data.price),
             details: data.details,
+            url: data.url,
         };
 
         // Include existing URLs if no new files uploaded
@@ -220,6 +225,25 @@ const EditBookPage = () => {
                                     <Input
                                         type="number"
                                         placeholder="Enter Book Price"
+                                        {...field}
+                                        className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="url"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Book Link</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter Book Link"
                                         {...field}
                                         className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
                                     />

@@ -10,7 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useGetDashboardChartQuery } from "@/redux/api/dashboardApi";
 
 const monthNames = [
@@ -28,12 +28,13 @@ const monthNames = [
   "Dec",
 ];
 
-const ViewReportChart = () => {
-  const [selectedYear, setSelectedYear] = useState<string>(
-    new Date().getFullYear().toString()
-  );
+interface ViewReportChartProps {
+  selectedYear: string;
+  setSelectedYear: (year: string) => void;
+}
 
-  const { data: chartData, isLoading, isError } = useGetDashboardChartQuery();
+const ViewReportChart = ({ selectedYear, setSelectedYear }: ViewReportChartProps) => {
+  const { data: chartData, isLoading, isError } = useGetDashboardChartQuery(selectedYear);
 
   const yearsOption = Array(5)
     .fill(0)

@@ -5,10 +5,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaArrowLeft } from "react-icons/fa6";
-import "react-quill/dist/quill.snow.css";
-
-// Dynamically import ReactQuill with SSR disabled
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import RichTextEditor from "@/components/shared/RichTextEditor";
 
 const AboutUsEditor = () => {
   const route = useRouter();
@@ -17,18 +14,6 @@ const AboutUsEditor = () => {
   );
   const [arabicValue, setArabicValue] = useState("");
 
-  const toolbarOptions = [
-    ["image"],
-    [{ header: [1, 2, false] }],
-    ["bold", "italic", "underline"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ align: [] }],
-    [{ color: [] }, { background: [] }],
-  ];
-
-  const moduleConest = {
-    toolbar: toolbarOptions,
-  };
 
   return (
     <>
@@ -42,17 +27,10 @@ const AboutUsEditor = () => {
         <h4 className="text-2xl font-medium text-text-color">About Us</h4>
       </div>
       <div className="lg:mt-10 mt-5 border rounded p-2">
-        <ReactQuill
-          modules={moduleConest}
-          theme="snow"
+        <RichTextEditor
           value={value}
           onChange={setValue}
           placeholder="Start writing ......"
-          style={{
-            // border: "1px solid #EFE8FD",
-            marginTop: "20px",
-            borderRadius: "10px",
-          }}
         />
       </div>
 

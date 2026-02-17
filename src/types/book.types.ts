@@ -8,6 +8,7 @@ export interface IBook {
     image: string;
     file: string;
     details: string;
+    url?: string;
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;

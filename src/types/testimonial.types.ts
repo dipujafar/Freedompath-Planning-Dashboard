@@ -7,6 +7,7 @@ export interface ITestimonial {
     clientPhoto: string;
     description: string;
     rating: number;
+    isVisible: boolean;
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;

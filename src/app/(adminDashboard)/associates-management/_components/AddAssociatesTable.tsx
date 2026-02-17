@@ -1,11 +1,12 @@
 "use client";
-import { Image as AntImage, TableProps, Spin } from "antd";
+import { Image as AntImage, TableProps, Spin, Modal } from "antd";
 import DataTable from "@/utils/DataTable";
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useGetAssociatesQuery } from "@/redux/api/associatesApi";
+import { useGetAssociatesQuery, useDeleteAssociateMutation } from "@/redux/api/associatesApi";
 import { IAssociate } from "@/types/associate.types";
 import dayjs from "dayjs";
+import { toast } from "sonner";
 
 type TDataType = {
     key: string;
@@ -20,6 +21,27 @@ type TDataType = {
 const AssociatesTable = () => {
     const router = useRouter();
     const { data: associatesData, isLoading, isError } = useGetAssociatesQuery();
+    const [deleteAssociate] = useDeleteAssociateMutation();
+
+    const handleDelete = (id: string) => {
+        Modal.confirm({
+            title: "Are you sure you want to delete this associate?",
+            content: "This action cannot be undone.",
+            okText: "Yes, Delete",
+            okType: "danger",
+            cancelText: "No, Cancel",
+            onOk: async () => {
+                try {
+                    const res = await deleteAssociate(id).unwrap();
+                    if (res.success) {
+                        toast.success("Associate deleted successfully");
+                    }
+                } catch (error: any) {
+                    toast.error(error?.data?.message || "Failed to delete associate");
+                }
+            },
+        });
+    };
 
     // Transform API data to table format
     const tableData: TDataType[] =
@@ -60,9 +82,10 @@ const AssociatesTable = () => {
             title: "Bio",
             dataIndex: "bio",
             render: (text: string) => (
-                <p className="max-w-[500px] truncate" title={text}>
-                    {text}
-                </p>
+                <div
+                    className="max-w-[500px] truncate-3-lines"
+                    dangerouslySetInnerHTML={{ __html: text }}
+                />
             ),
         },
         {
@@ -84,6 +107,12 @@ const AssociatesTable = () => {
                         size={20}
                         color="#4378A8"
                         onClick={() => router.push(`/associates-management/edit/${record.id}`)}
+                        className="cursor-pointer hover:opacity-70 transition-opacity"
+                    />
+                    <Trash2
+                        size={20}
+                        color="#FF4D4F"
+                        onClick={() => handleDelete(record.id)}
                         className="cursor-pointer hover:opacity-70 transition-opacity"
                     />
                 </div>
