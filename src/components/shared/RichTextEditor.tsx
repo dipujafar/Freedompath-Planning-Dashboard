@@ -40,7 +40,8 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
       className="rich-text-editor-wrapper bg-[#F9FAFB] rounded-lg border"
       style={{
         height: containerHeight,
-        overflow: 'hidden'
+        position: 'relative',
+        zIndex: 5
       }}
     >
       <style>{`
@@ -48,7 +49,6 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
           display: flex;
           flex-direction: column;
           height: 100%;
-          overflow: hidden;
         }
         .rich-text-editor-wrapper .ql-toolbar {
           flex-shrink: 0;
@@ -58,7 +58,12 @@ const RichTextEditor = ({ value, onChange, placeholder }: RichTextEditorProps) =
           border-bottom: 1px solid #e5e7eb;
           background: #fff;
           border-radius: 8px 8px 0 0;
-          overflow: hidden;
+          position: relative;
+          z-index: 10;
+        }
+        .rich-text-editor-wrapper .ql-picker-options {
+          z-index: 1000 !important;
+          background: #fff;
         }
         .rich-text-editor-wrapper .ql-container {
           flex: 1;
