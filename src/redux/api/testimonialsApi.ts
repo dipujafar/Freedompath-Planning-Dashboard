@@ -66,6 +66,15 @@ const testimonialsApi = baseApi.injectEndpoints({
                 { type: tagTypes.testimonials, id },
             ],
         }),
+
+        // Delete testimonial
+        deleteTestimonial: build.mutation<ISingleTestimonialResponse, string>({
+            query: (id) => ({
+                url: `/testimonial/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [tagTypes.testimonials],
+        }),
     }),
 });
 
@@ -74,5 +83,6 @@ export const {
     useGetSingleTestimonialQuery,
     useCreateTestimonialMutation,
     useUpdateTestimonialMutation,
+    useDeleteTestimonialMutation,
 } = testimonialsApi;
 

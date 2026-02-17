@@ -1,13 +1,37 @@
 "use client";
 
-import { Star, Eye, Pencil } from "lucide-react";
+import { Star, Eye, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ITestimonial } from "@/types/testimonial.types";
+import { Modal } from "antd";
+import { useDeleteTestimonialMutation } from "@/redux/api/testimonialsApi";
+import { toast } from "sonner";
 
 export default function TestimonialCard({ review }: { review: ITestimonial }) {
     const router = useRouter();
+    const [deleteTestimonial] = useDeleteTestimonialMutation();
     const fullStars = Math.floor(review.rating);
+
+    const handleDelete = (id: string) => {
+        Modal.confirm({
+            title: "Are you sure you want to delete this testimonial?",
+            content: "This action cannot be undone.",
+            okText: "Yes, Delete",
+            okType: "danger",
+            cancelText: "No, Cancel",
+            onOk: async () => {
+                try {
+                    const res = await deleteTestimonial(id).unwrap();
+                    if (res.success) {
+                        toast.success("Testimonial deleted successfully");
+                    }
+                } catch (error: any) {
+                    toast.error(error?.data?.message || "Failed to delete testimonial");
+                }
+            },
+        });
+    };
 
     return (
         <div className="flex flex-col md:flex-row lg:gap-8 gap-3 w-full bg-section-bg rounded-xl p-4 border border-border-color">
@@ -34,11 +58,11 @@ export default function TestimonialCard({ review }: { review: ITestimonial }) {
                         <Star size={18} fill="#2563EB" className="text-[#2563EB] opacity-50" />
                     )}
                 </div>
-                <p className="text-lg font-medium line-clamp-3">
+                <div className="text-lg font-medium line-clamp-3">
                     <span>"</span>
-                    {review.description}
+                    <span dangerouslySetInnerHTML={{ __html: review.description }} />
                     <span>"</span>
-                </p>
+                </div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-x-2.5">
                         <p className="text-[#090914] font-semibold">{review.clientName}</p>
@@ -57,9 +81,16 @@ export default function TestimonialCard({ review }: { review: ITestimonial }) {
                             onClick={() => router.push(`/testimonial-management/edit/${review.id}`)}
                             className="cursor-pointer hover:opacity-70 transition-opacity"
                         />
+                        <Trash2
+                            size={18}
+                            color="#FF4D4F"
+                            onClick={() => handleDelete(review.id)}
+                            className="cursor-pointer hover:opacity-70 transition-opacity"
+                        />
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
