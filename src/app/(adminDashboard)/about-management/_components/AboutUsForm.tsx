@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/shared/RichTextEditor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Spin } from "antd";
@@ -496,10 +497,10 @@ export function AboutUsForm() {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
                         placeholder="Enter description..."
-                        className="min-h-32 resize-y border border-[#E1E1E1] bg-[#F9FAFB]"
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -695,7 +696,7 @@ export function AboutUsForm() {
             <div className="space-y-6">
               <h2 className="text-lg font-semibold text-black/70">Business Owner</h2>
 
-              
+
               <FormField
                 control={form.control}
                 name="sectionTitle"
@@ -788,10 +789,10 @@ export function AboutUsForm() {
                   <FormItem>
                     <FormLabel>Bio</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <RichTextEditor
+                        value={field.value}
+                        onChange={field.onChange}
                         placeholder="Enter bio..."
-                        className="min-h-32 resize-y border border-[#E1E1E1] bg-[#F9FAFB]"
-                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
