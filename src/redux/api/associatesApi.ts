@@ -66,6 +66,15 @@ const associatesApi = baseApi.injectEndpoints({
                 { type: tagTypes.associates, id },
             ],
         }),
+
+        // Delete associate
+        deleteAssociate: build.mutation<ISingleAssociateResponse, string>({
+            query: (id) => ({
+                url: `/associates/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [tagTypes.associates],
+        }),
     }),
 });
 
@@ -74,4 +83,5 @@ export const {
     useGetSingleAssociateQuery,
     useCreateAssociateMutation,
     useUpdateAssociateMutation,
+    useDeleteAssociateMutation,
 } = associatesApi;
