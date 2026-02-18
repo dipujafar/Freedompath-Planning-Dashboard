@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useUpdateServiceSectionMutation, useUpdateBlogSectionMutation, useUpdateResourceSectionMutation, useUpdateLearnAndGrowSectionMutation } from "@/redux/api/homePageApi";
+import { useUpdateServiceSectionMutation, useUpdateBlogSectionMutation, useUpdateResourceSectionMutation, useUpdateLearnAndGrowSectionMutation, useUpdateTestimonialSectionMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
@@ -37,6 +37,7 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
     const [updateBlogSection] = useUpdateBlogSectionMutation();
     const [updateResourceSection] = useUpdateResourceSectionMutation();
     const [updateLearnAndGrowSection] = useUpdateLearnAndGrowSectionMutation();
+    const [updateTestimonialSection] = useUpdateTestimonialSectionMutation();
 
     // Determine loading state
     const [isUpdating, setIsUpdating] = useState(false);
@@ -69,6 +70,9 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
                 toast.success(`${sectionName} updated successfully!`);
             } else if (sectionName === "Learn & Grow Section") {
                 await updateLearnAndGrowSection(payload).unwrap();
+                toast.success(`${sectionName} updated successfully!`);
+            } else if (sectionName === "Testimonial Section") {
+                await updateTestimonialSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else {
                 // Placeholder for other sections

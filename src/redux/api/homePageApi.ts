@@ -59,6 +59,14 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        updateTestimonialSection: build.mutation<void, any>({
+            query: (data) => ({
+                url: "/homePageContents/testimonial-section",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
     }),
     overrideExisting: false,
 });
@@ -73,4 +81,5 @@ export const {
     useUpdateBlogSectionMutation,
     useUpdateResourceSectionMutation,
     useUpdateLearnAndGrowSectionMutation,
+    useUpdateTestimonialSectionMutation,
 } = homePageApi;
