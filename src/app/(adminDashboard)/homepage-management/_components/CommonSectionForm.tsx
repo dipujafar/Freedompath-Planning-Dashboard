@@ -17,12 +17,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useUpdateServiceSectionMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
     tag: z.string().min(1, "Tag is required"),
     title: z.string().min(1, "Title is required"),
-    subtitle: z.string().min(1, "Subtitle is required"),
+    subTitle: z.string().min(1, "Subtitle is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -32,29 +33,30 @@ interface CommonSectionFormProps {
 }
 
 export default function CommonSectionForm({ sectionName }: CommonSectionFormProps) {
-    const [isLoading, setIsLoading] = useState(false);
+    const [updateServiceSection, { isLoading }] = useUpdateServiceSectionMutation();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             tag: "",
             title: "",
-            subtitle: "",
+            subTitle: "",
         },
     });
 
     const onSubmit = async (values: FormValues) => {
-        setIsLoading(true);
         try {
-            console.log(`${sectionName} Form Values:`, values);
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            toast.success(`${sectionName} updated successfully!`);
-        } catch (error) {
-            toast.error(`Failed to update ${sectionName}`);
+            if (sectionName === "Service Section") {
+                await updateServiceSection(values).unwrap();
+                toast.success(`${sectionName} updated successfully!`);
+            } else {
+                // Placeholder for other sections
+                toast.info(`${sectionName} API not implemented yet`);
+                console.log(`${sectionName} Values:`, values);
+            }
+        } catch (error: any) {
+            toast.error(error?.data?.message || `Failed to update ${sectionName}`);
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -105,7 +107,7 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
                     {/* Subtitle Field */}
                     <FormField
                         control={form.control}
-                        name="subtitle"
+                        name="subTitle"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Subtitle</FormLabel>
