@@ -43,6 +43,22 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        updateResourceSection: build.mutation<void, any>({
+            query: (data) => ({
+                url: "/homePageContents/resources-section",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
+        updateLearnAndGrowSection: build.mutation<void, any>({
+            query: (data) => ({
+                url: "/homePageContents/learn-and-grow-with-our-books-section",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
     }),
     overrideExisting: false,
 });
@@ -55,4 +71,6 @@ export const {
     useUpdateServicePageSettingsMutation,
     useUpdateServiceDetailsIncludedSectionMutation,
     useUpdateBlogSectionMutation,
+    useUpdateResourceSectionMutation,
+    useUpdateLearnAndGrowSectionMutation,
 } = homePageApi;
