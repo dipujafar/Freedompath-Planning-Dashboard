@@ -17,12 +17,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useUpdateServiceDetailsIncludedSectionMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
     tag: z.string().min(1, "Tag is required"),
     title: z.string().min(1, "Title is required"),
-    subtitle: z.string().min(1, "Subtitle is required"),
+    subTitle: z.string().min(1, "Subtitle is required"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -32,29 +33,30 @@ interface ServiceDetailsSettingsFormProps {
 }
 
 export default function ServiceDetailsSettingsForm({ sectionName = "What's Included Section" }: ServiceDetailsSettingsFormProps) {
-    const [isLoading, setIsLoading] = useState(false);
+    const [updateServiceDetailsIncludedSection, { isLoading }] = useUpdateServiceDetailsIncludedSectionMutation();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             tag: "",
             title: "",
-            subtitle: "",
+            subTitle: "",
         },
     });
 
     const onSubmit = async (values: FormValues) => {
-        setIsLoading(true);
+        const payload = {
+            key: "main",
+            tag: values.tag,
+            title: values.title,
+            subTitle: values.subTitle,
+        };
         try {
-            console.log(`${sectionName} Form Values:`, values);
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await updateServiceDetailsIncludedSection(payload).unwrap();
             toast.success(`${sectionName} updated successfully!`);
-        } catch (error) {
-            toast.error(`Failed to update ${sectionName}`);
+        } catch (error: any) {
+            toast.error(error?.data?.message || `Failed to update ${sectionName}`);
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -105,7 +107,7 @@ export default function ServiceDetailsSettingsForm({ sectionName = "What's Inclu
                     {/* Subtitle Field */}
                     <FormField
                         control={form.control}
-                        name="subtitle"
+                        name="subTitle"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Subtitle</FormLabel>

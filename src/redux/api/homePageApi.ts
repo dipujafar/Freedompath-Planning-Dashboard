@@ -27,7 +27,29 @@ export const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        updateServiceDetailsIncludedSection: build.mutation<void, any>({
+            query: (data) => ({
+                url: "/homePageContents/service-details-page-whats-included-section",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
+        updateBlogSection: build.mutation<void, any>({
+            query: (data) => ({
+                url: "/homePageContents/service-details-page-blog-section",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
     }),
 });
 
-export const { useUpdateHeroSectionMutation, useUpdateServiceSectionMutation, useUpdateServicePageSettingsMutation } = homePageApi;
+export const {
+    useUpdateHeroSectionMutation,
+    useUpdateServiceSectionMutation,
+    useUpdateServicePageSettingsMutation,
+    useUpdateServiceDetailsIncludedSectionMutation,
+    useUpdateBlogSectionMutation,
+} = homePageApi;
