@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useUpdateServiceSectionMutation } from "@/redux/api/homePageApi";
+import { useUpdateServiceSectionMutation, useUpdateBlogSectionMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
@@ -33,7 +33,11 @@ interface CommonSectionFormProps {
 }
 
 export default function CommonSectionForm({ sectionName }: CommonSectionFormProps) {
-    const [updateServiceSection, { isLoading }] = useUpdateServiceSectionMutation();
+    const [updateServiceSection] = useUpdateServiceSectionMutation();
+    const [updateBlogSection] = useUpdateBlogSectionMutation();
+
+    // Determine loading state
+    const [isUpdating, setIsUpdating] = useState(false);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -45,9 +49,18 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
     });
 
     const onSubmit = async (values: FormValues) => {
+        setIsUpdating(true);
+        const payload = {
+            key: "main",
+            ...values
+        };
+
         try {
             if (sectionName === "Service Section") {
                 await updateServiceSection(values).unwrap();
+                toast.success(`${sectionName} updated successfully!`);
+            } else if (sectionName === "Blog Section") {
+                await updateBlogSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else {
                 // Placeholder for other sections
@@ -57,6 +70,8 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
         } catch (error: any) {
             toast.error(error?.data?.message || `Failed to update ${sectionName}`);
             console.error(error);
+        } finally {
+            setIsUpdating(false);
         }
     };
 
@@ -125,10 +140,10 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
 
                     <Button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isUpdating}
                         className="w-full bg-main-color text-white hover:bg-main-color/90 py-6 text-lg font-medium"
                     >
-                        {isLoading ? (
+                        {isUpdating ? (
                             <>
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                 Saving...

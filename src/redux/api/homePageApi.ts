@@ -1,7 +1,7 @@
 import { baseApi } from "./baseApi";
 import { tagTypes } from "../tagTypes";
 
-export const homePageApi = baseApi.injectEndpoints({
+const homePageApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
         updateHeroSection: build.mutation<void, FormData>({
             query: (data) => ({
@@ -44,7 +44,10 @@ export const homePageApi = baseApi.injectEndpoints({
             invalidatesTags: [tagTypes.homePage]
         }),
     }),
+    overrideExisting: false,
 });
+
+export { homePageApi };
 
 export const {
     useUpdateHeroSectionMutation,
