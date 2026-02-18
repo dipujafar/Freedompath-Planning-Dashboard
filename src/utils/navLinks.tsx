@@ -1,4 +1,4 @@
-import { RiDashboardHorizontalFill } from "react-icons/ri";
+import { RiDashboardHorizontalFill, RiHomeSmileFill } from "react-icons/ri";
 import { IoSettingsOutline } from "react-icons/io5";
 import Link from "next/link";
 import { BookAudio, BookmarkCheck, BookOpenText, FileDown, NotebookText, UsersRound } from "lucide-react";
@@ -74,4 +74,10 @@ export const navLinks = [
   //   icon: <RiLogoutCircleLine size={18} />,
   //   label: <Link href={"/login"}>Logout</Link>,
   // },
+  {
+    key: "homepage-management",
+    icon: <RiHomeSmileFill size={18} />,
+    label: <Link href={"/homepage-management"}>Homepage Management</Link>,
+  },
 ];
+
