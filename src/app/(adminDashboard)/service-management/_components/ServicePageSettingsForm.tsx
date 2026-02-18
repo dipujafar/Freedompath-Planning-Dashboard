@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useUpdateServicePageSettingsMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
@@ -32,7 +33,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function ServicePageSettingsForm() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [updateServicePageSettings, { isLoading }] = useUpdateServicePageSettingsMutation();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -78,17 +79,27 @@ export default function ServicePageSettingsForm() {
     };
 
     const onSubmit = async (values: FormValues) => {
-        setIsLoading(true);
+        const formData = new FormData();
+
+        const data = {
+            servicePageTitle: values.title,
+            servicePageDescription: values.description,
+            servicePageGradientText: values.gradientText,
+            servicePageNormalText: values.normalText,
+        };
+
+        formData.append("data", JSON.stringify(data));
+
+        if (selectedFile) {
+            formData.append("servicePageImg", selectedFile);
+        }
+
         try {
-            console.log("Service Page Settings Values:", values);
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await updateServicePageSettings(formData).unwrap();
             toast.success("Service page settings updated successfully!");
-        } catch (error) {
-            toast.error("Failed to update service page settings");
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to update service page settings");
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 

@@ -19,7 +19,15 @@ export const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        updateServicePageSettings: build.mutation<void, FormData>({
+            query: (data) => ({
+                url: "/homePageContents/service-section",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
     }),
 });
 
-export const { useUpdateHeroSectionMutation, useUpdateServiceSectionMutation } = homePageApi;
+export const { useUpdateHeroSectionMutation, useUpdateServiceSectionMutation, useUpdateServicePageSettingsMutation } = homePageApi;
