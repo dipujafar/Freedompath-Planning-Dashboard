@@ -3,6 +3,10 @@ import { tagTypes } from "../tagTypes";
 
 const homePageApi = baseApi.injectEndpoints({
     endpoints: (build) => ({
+        getHeroSection: build.query<any, void>({
+            query: () => "/homePageContents/hero-section",
+            providesTags: [tagTypes.homePage]
+        }),
         updateHeroSection: build.mutation<void, FormData>({
             query: (data) => ({
                 url: "/homePageContents/hero-section",
@@ -67,6 +71,29 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        addHeroButton: build.mutation<void, any>({
+            query: (data) => ({
+                url: "/hero-buttons",
+                method: "POST",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
+        updateHeroButton: build.mutation<void, { id: string, data: any }>({
+            query: ({ id, data }) => ({
+                url: `/hero-buttons/${id}`,
+                method: "PATCH",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
+        deleteHeroButton: build.mutation<void, string>({
+            query: (id) => ({
+                url: `/hero-buttons/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
     }),
     overrideExisting: false,
 });
@@ -74,6 +101,7 @@ const homePageApi = baseApi.injectEndpoints({
 export { homePageApi };
 
 export const {
+    useGetHeroSectionQuery,
     useUpdateHeroSectionMutation,
     useUpdateServiceSectionMutation,
     useUpdateServicePageSettingsMutation,
@@ -82,4 +110,7 @@ export const {
     useUpdateResourceSectionMutation,
     useUpdateLearnAndGrowSectionMutation,
     useUpdateTestimonialSectionMutation,
+    useAddHeroButtonMutation,
+    useUpdateHeroButtonMutation,
+    useDeleteHeroButtonMutation,
 } = homePageApi;

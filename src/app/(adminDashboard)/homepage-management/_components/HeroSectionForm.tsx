@@ -17,7 +17,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useUpdateHeroSectionMutation } from "@/redux/api/homePageApi";
+import {
+    useAddHeroButtonMutation,
+    useDeleteHeroButtonMutation,
+    useGetHeroSectionQuery,
+    useUpdateHeroButtonMutation,
+    useUpdateHeroSectionMutation
+} from "@/redux/api/homePageApi";
 
 
 // Define the validation schema
@@ -29,8 +35,9 @@ const formSchema = z.object({
     buttons: z
         .array(
             z.object({
+                _id: z.string().optional(),
                 title: z.string().min(1, "Button title is required"),
-                hyperlink: z.string().min(1, "Hyperlink is required").url("Must be a valid URL"),
+                hyperlink: z.string().min(1, "Hyperlink is required"),
             })
         )
         .optional(),
@@ -44,7 +51,14 @@ type FormValues = z.infer<typeof formSchema>;
 export default function HeroSectionForm() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [updateHeroSection, { isLoading }] = useUpdateHeroSectionMutation();
+    const [deletedButtonIds, setDeletedButtonIds] = useState<string[]>([]);
+
+    // API Hooks
+    const { data: heroData } = useGetHeroSectionQuery();
+    const [updateHeroSection, { isLoading: isUpdatingHero }] = useUpdateHeroSectionMutation();
+    const [addHeroButton] = useAddHeroButtonMutation();
+    const [updateHeroButton] = useUpdateHeroButtonMutation();
+    const [deleteHeroButton] = useDeleteHeroButtonMutation();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -59,13 +73,41 @@ export default function HeroSectionForm() {
         },
     });
 
+    // Populate form with existing data
+    React.useEffect(() => {
+        if (heroData?.data) {
+            const { tag, title, subtitle, description, buttons, floatingCardTitle, floatingCardShortDescription, heroImage } = heroData.data;
+            form.reset({
+                tag: tag || "",
+                title: title || "",
+                subtitle: subtitle || "",
+                description: description || "",
+                buttons: buttons?.length > 0 ? buttons.map((b: any) => ({
+                    _id: b._id,
+                    title: b.title,
+                    hyperlink: b.link || b.hyperlink || "" // Handle potential field name variance
+                })) : [{ title: "", hyperlink: "" }],
+                floatingCardTitle: floatingCardTitle || "",
+                floatingCardDescription: floatingCardShortDescription || "",
+            });
+            if (heroImage) {
+                setPreviewUrl(heroImage);
+            }
+        }
+    }, [heroData, form]);
+
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: "buttons",
     });
 
-
-
+    const handleRemoveButton = (index: number) => {
+        const button = fields[index];
+        if (button._id) {
+            setDeletedButtonIds(prev => [...prev, button._id!]);
+        }
+        remove(index);
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -103,26 +145,55 @@ export default function HeroSectionForm() {
     const onSubmit = async (values: FormValues) => {
         const formData = new FormData();
 
-        const data = {
+        // 1. Prepare Hero Section Main Data (Removing buttons as per requirement)
+        const heroDataPayload = {
             key: "main",
             tag: values.tag,
             title: values.title,
             subtitle: values.subtitle,
             description: values.description,
-            buttons: values.buttons,
             floatingCardTitle: values.floatingCardTitle,
             floatingCardShortDescription: values.floatingCardDescription,
         };
 
-        formData.append("data", JSON.stringify(data));
+        formData.append("data", JSON.stringify(heroDataPayload));
 
         if (selectedFile) {
             formData.append("heroImg", selectedFile);
         }
 
         try {
-            await updateHeroSection(formData).unwrap();
-            toast.success("Hero section updated successfully!");
+            // 2. Handle Deletions
+            const deletionPromises = deletedButtonIds.map(id => deleteHeroButton(id).unwrap());
+
+            // 3. Handle Additions and Updates
+            const buttonPromises = (values.buttons || []).map((btn, index) => {
+                const btnData = {
+                    key: `button_${index + 1}`,
+                    index: index + 1,
+                    title: btn.title,
+                    link: btn.hyperlink
+                };
+
+                if (btn._id) {
+                    // Update existing button
+                    return updateHeroButton({ id: btn._id, data: btnData }).unwrap();
+                } else if (btn.title && btn.hyperlink) {
+                    // Add new button
+                    return addHeroButton(btnData).unwrap();
+                }
+                return Promise.resolve();
+            });
+
+            // 4. Update Main Hero Section
+            await Promise.all([
+                ...deletionPromises,
+                ...buttonPromises,
+                updateHeroSection(formData).unwrap()
+            ]);
+
+            setDeletedButtonIds([]); // Reset deletions on success
+            toast.success("Hero section and buttons updated successfully!");
         } catch (error: any) {
             toast.error(error?.data?.message || "Failed to update hero section");
             console.error(error);
@@ -311,8 +382,8 @@ export default function HeroSectionForm() {
                                     variant="ghost"
                                     size="icon"
                                     className="text-red-500 hover:text-red-700 hover:bg-red-50 mt-8"
-                                    onClick={() => remove(index)}
-                                    disabled={fields.length === 1 && index === 0} // Prevent removing the only button if desired, or allow empty
+                                    onClick={() => handleRemoveButton(index)}
+                                    disabled={fields.length === 1 && index === 0}
                                 >
                                     <Trash2 className="h-5 w-5" />
                                 </Button>
@@ -365,10 +436,10 @@ export default function HeroSectionForm() {
 
                     <Button
                         type="submit"
-                        disabled={isLoading}
+                        disabled={isUpdatingHero}
                         className="w-full bg-main-color text-white hover:bg-main-color/90 py-6 text-lg font-medium"
                     >
-                        {isLoading ? (
+                        {isUpdatingHero ? (
                             <>
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                                 Saving...
