@@ -60,6 +60,11 @@ export const navLinks = [
     label: <Link href={"/reports-management"}>Reports Management</Link>,
   },
   {
+    key: "homepage-management",
+    icon: <RiHomeSmileFill size={18} />,
+    label: <Link href={"/homepage-management"}>Homepage Management</Link>,
+  },
+  {
     key: "footer-management",
     icon: <BookmarkCheck size={18} />,
     label: <Link href={"/footer-management"}>Footer Management</Link>,
@@ -74,10 +79,6 @@ export const navLinks = [
   //   icon: <RiLogoutCircleLine size={18} />,
   //   label: <Link href={"/login"}>Logout</Link>,
   // },
-  {
-    key: "homepage-management",
-    icon: <RiHomeSmileFill size={18} />,
-    label: <Link href={"/homepage-management"}>Homepage Management</Link>,
-  },
+
 ];
 

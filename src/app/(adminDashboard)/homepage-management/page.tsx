@@ -3,6 +3,7 @@ import React from "react";
 import { Tabs } from "antd";
 import type { TabsProps } from "antd";
 import HeroSectionForm from "./_components/HeroSectionForm";
+import CommonSectionForm from "./_components/CommonSectionForm";
 
 const items: TabsProps["items"] = [
     {
@@ -13,27 +14,27 @@ const items: TabsProps["items"] = [
     {
         key: "2",
         label: "Service Section",
-        children: <div className="p-4 text-center text-gray-500">Service Section Content (Coming Soon)</div>,
+        children: <CommonSectionForm sectionName="Service Section" />,
     },
     {
         key: "3",
         label: "Blog Section",
-        children: <div className="p-4 text-center text-gray-500">Blog Section Content (Coming Soon)</div>,
+        children: <CommonSectionForm sectionName="Blog Section" />,
     },
     {
         key: "4",
         label: "Resource Section",
-        children: <div className="p-4 text-center text-gray-500">Resource Section Content (Coming Soon)</div>,
+        children: <CommonSectionForm sectionName="Resource Section" />,
     },
     {
         key: "5",
         label: "Learn & Grow Section",
-        children: <div className="p-4 text-center text-gray-500">Learn & Grow Section Content (Coming Soon)</div>,
+        children: <CommonSectionForm sectionName="Learn & Grow Section" />,
     },
     {
         key: "6",
         label: "Testimonial Section",
-        children: <div className="p-4 text-center text-gray-500">Testimonial Section Content (Coming Soon)</div>,
+        children: <CommonSectionForm sectionName="Testimonial Section" />,
     },
 ];
 
