@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useUpdateHeroSectionMutation } from "@/redux/api/homePageApi";
 
 
 // Define the validation schema
@@ -24,6 +25,7 @@ const formSchema = z.object({
     tag: z.string().min(1, "Tag is required"),
     title: z.string().min(1, "Title is required"),
     subtitle: z.string().min(1, "Subtitle is required"),
+    description: z.string().min(1, "Description is required"),
     buttons: z
         .array(
             z.object({
@@ -42,7 +44,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function HeroSectionForm() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [updateHeroSection, { isLoading }] = useUpdateHeroSectionMutation();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -50,6 +52,7 @@ export default function HeroSectionForm() {
             tag: "",
             title: "",
             subtitle: "",
+            description: "",
             buttons: [{ title: "", hyperlink: "" }],
             floatingCardTitle: "",
             floatingCardDescription: "",
@@ -60,6 +63,9 @@ export default function HeroSectionForm() {
         control: form.control,
         name: "buttons",
     });
+
+
+
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -95,17 +101,31 @@ export default function HeroSectionForm() {
     };
 
     const onSubmit = async (values: FormValues) => {
-        setIsLoading(true);
+        const formData = new FormData();
+
+        const data = {
+            key: "main",
+            tag: values.tag,
+            title: values.title,
+            subtitle: values.subtitle,
+            description: values.description,
+            buttons: values.buttons,
+            floatingCardTitle: values.floatingCardTitle,
+            floatingCardShortDescription: values.floatingCardDescription,
+        };
+
+        formData.append("data", JSON.stringify(data));
+
+        if (selectedFile) {
+            formData.append("heroImg", selectedFile);
+        }
+
         try {
-            console.log("Form Values:", values);
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await updateHeroSection(formData).unwrap();
             toast.success("Hero section updated successfully!");
-        } catch (error) {
-            toast.error("Failed to update hero section");
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to update hero section");
             console.error(error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -163,6 +183,25 @@ export default function HeroSectionForm() {
                                 <FormControl>
                                     <Textarea
                                         placeholder="Enter Subtitle"
+                                        {...field}
+                                        className="border border-[#E1E1E1] bg-[#F9FAFB] min-h-[100px]"
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Description Field */}
+                    <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        placeholder="Enter Description"
                                         {...field}
                                         className="border border-[#E1E1E1] bg-[#F9FAFB] min-h-[100px]"
                                     />
