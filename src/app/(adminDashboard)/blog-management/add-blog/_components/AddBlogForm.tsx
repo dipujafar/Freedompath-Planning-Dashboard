@@ -30,8 +30,9 @@ const blogSchema = z.object({
         .max(100, "Blog title must be less than 100 characters"),
     subTitle: z
         .string()
-        .min(1, "Subtitle is required")
-        .max(200, "Subtitle must be less than 200 characters"),
+        .max(200, "Subtitle must be less than 200 characters")
+        .optional()
+        .or(z.literal("")),
     details: z
         .string()
         .min(1, "Blog details are required")
@@ -125,7 +126,7 @@ const AddBlogForm = () => {
                         name="subTitle"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Blog Subtitle</FormLabel>
+                                <FormLabel>Blog Subtitle <span className="text-muted-foreground font-normal text-xs">(Optional)</span></FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Enter blog subtitle"

@@ -118,6 +118,18 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        getResourcesPage: build.query<any, void>({
+            query: () => "/homePageContents/resources-page",
+            providesTags: [tagTypes.homePage]
+        }),
+        updateResourcesPage: build.mutation<void, FormData>({
+            query: (data) => ({
+                url: "/homePageContents/resources-page",
+                method: "PUT",
+                body: data,
+            }),
+            invalidatesTags: [tagTypes.homePage]
+        }),
     }),
     overrideExisting: false,
 });
@@ -143,4 +155,6 @@ export const {
     useAddHeroButtonMutation,
     useUpdateHeroButtonMutation,
     useDeleteHeroButtonMutation,
+    useGetResourcesPageQuery,
+    useUpdateResourcesPageMutation,
 } = homePageApi;

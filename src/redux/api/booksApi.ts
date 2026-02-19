@@ -66,6 +66,18 @@ const booksApi = baseApi.injectEndpoints({
                 { type: tagTypes.books, id },
             ],
         }),
+
+        // Delete book
+        deleteBook: build.mutation<{ success: boolean; message: string }, string>({
+            query: (id) => ({
+                url: `/books/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (result, error, id) => [
+                tagTypes.books,
+                { type: tagTypes.books, id },
+            ],
+        }),
     }),
 });
 
@@ -74,4 +86,5 @@ export const {
     useGetSingleBookQuery,
     useCreateBookMutation,
     useUpdateBookMutation,
+    useDeleteBookMutation,
 } = booksApi;

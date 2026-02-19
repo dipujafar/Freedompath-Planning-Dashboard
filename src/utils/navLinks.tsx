@@ -1,7 +1,7 @@
 import { RiDashboardHorizontalFill, RiHomeSmileFill } from "react-icons/ri";
 import { IoSettingsOutline } from "react-icons/io5";
 import Link from "next/link";
-import { BookAudio, BookmarkCheck, BookOpenText, FileDown, NotebookText, UsersRound } from "lucide-react";
+import { BookAudio, BookmarkCheck, BookOpenText, FileDown, MessageSquare, NotebookText, UsersRound } from "lucide-react";
 import { TbShoppingBagMinus } from "react-icons/tb";
 import { FaRegStarHalfStroke } from "react-icons/fa6";
 import { BsImageFill } from "react-icons/bs";
@@ -42,7 +42,12 @@ export const navLinks = [
   {
     key: "ebook-download",
     icon: <FileDown size={18} />,
-    label: <Link href={"/ebook-download"}>Ebook Download</Link>,
+    label: <Link href={"/ebook-download"}>Book Download</Link>,
+  },
+  {
+    key: "ebook-resources-download",
+    icon: <FileDown size={18} />,
+    label: <Link href={"/ebook-resources-download"}>Ebook Download</Link>,
   },
   {
     key: "book-management",
@@ -68,6 +73,11 @@ export const navLinks = [
     key: "footer-management",
     icon: <BookmarkCheck size={18} />,
     label: <Link href={"/footer-management"}>Footer Management</Link>,
+  },
+  {
+    key: "contact-us-management",
+    icon: <MessageSquare size={18} />,
+    label: <Link href={"/contact-us-management"}>Contact Us Management</Link>,
   },
   {
     key: "settings",

@@ -30,13 +30,13 @@ const items = [
     },
     {
         key: '3',
-        label: 'E-Book Resources List',
+        label: 'Book Resources List',
         children: (
             <div>
                 <div className="flex-between mb-4">
-                    <h2 className="text-lg font-medium text-gray-700">All E-Book Resources</h2>
+                    <h2 className="text-lg font-medium text-gray-700">All Book Resources</h2>
                     <Link href={"/resources-management/add-resource/book"}>
-                        <Button icon={<PlusIcon size={20} />} className="!h-[40px] hover:!bg-black">Add E-Book</Button>
+                        <Button icon={<PlusIcon size={20} />} className="!h-[40px] hover:!bg-black">Add Book</Button>
                     </Link>
                 </div>
                 <EbookResources />

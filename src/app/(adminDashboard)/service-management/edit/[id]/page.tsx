@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { ArrowLeft, Loader2, Plus, Trash2 } from "lucide-react"
+import { ArrowLeft, Loader2, Plus, Trash2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -279,23 +279,30 @@ export default function EditServicePage() {
 
                                 <div className="space-y-2">
                                     <Label>Services Photo</Label>
-                                    {existingServicePhoto && (
-                                        <div className="mb-3">
-                                            <p className="text-sm text-muted-foreground mb-2">Current Image:</p>
+                                    {existingServicePhoto ? (
+                                        <div className="relative w-fit">
                                             <img
                                                 src={existingServicePhoto}
                                                 alt="Current service"
-                                                className="w-32 h-32 object-cover rounded-lg border"
+                                                className="w-40 h-40 object-cover rounded-lg border border-[#E1E1E1]"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setExistingServicePhoto(null)
+                                                    form.setValue("servicePhoto", "" as any)
+                                                }}
+                                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center shadow-md transition-colors"
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
                                         </div>
+                                    ) : (
+                                        <FileUpload onFileChange={(file) => {
+                                            if (file) form.setValue("servicePhoto", file as File)
+                                            else form.setValue("servicePhoto", "" as any)
+                                        }} />
                                     )}
-                                    <FileUpload onFileChange={(file) => {
-                                        if (file) {
-                                            form.setValue("servicePhoto", file as File)
-                                            setExistingServicePhoto(null)
-                                        }
-                                    }} />
-                                    <p className="text-xs text-muted-foreground">Leave empty to keep current image</p>
                                     {form.formState.errors.servicePhoto && (
                                         <p className="text-sm text-destructive">{form.formState.errors.servicePhoto.message as string}</p>
                                     )}
@@ -316,23 +323,31 @@ export default function EditServicePage() {
                                 <h2 className="text-lg font-medium">What Your Client Gets</h2>
 
                                 <div className="space-y-2">
-                                    {existingClientGetsImage && (
-                                        <div className="mb-3">
-                                            <p className="text-sm text-muted-foreground mb-2">Current Image:</p>
+                                    <Label>Client Gets Image</Label>
+                                    {existingClientGetsImage ? (
+                                        <div className="relative w-fit">
                                             <img
                                                 src={existingClientGetsImage}
                                                 alt="Current client gets"
-                                                className="w-32 h-32 object-cover rounded-lg border"
+                                                className="w-40 h-40 object-cover rounded-lg border border-[#E1E1E1]"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setExistingClientGetsImage(null)
+                                                    form.setValue("clientGetsImage", "" as any)
+                                                }}
+                                                className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full h-6 w-6 flex items-center justify-center shadow-md transition-colors"
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
                                         </div>
+                                    ) : (
+                                        <FileUpload onFileChange={(file) => {
+                                            if (file) form.setValue("clientGetsImage", file as File)
+                                            else form.setValue("clientGetsImage", "" as any)
+                                        }} />
                                     )}
-                                    <FileUpload onFileChange={(file) => {
-                                        if (file) {
-                                            form.setValue("clientGetsImage", file as File)
-                                            setExistingClientGetsImage(null)
-                                        }
-                                    }} />
-                                    <p className="text-xs text-muted-foreground">Leave empty to keep current image</p>
                                     {form.formState.errors.clientGetsImage && (
                                         <p className="text-sm text-destructive">{form.formState.errors.clientGetsImage.message as string}</p>
                                     )}
