@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useUpdateServicePageSettingsMutation } from "@/redux/api/homePageApi";
+import { useGetServiceSectionQuery, useUpdateServicePageSettingsMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
@@ -33,6 +33,7 @@ type FormValues = z.infer<typeof formSchema>;
 export default function ServicePageSettingsForm() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const { data: servicePageData } = useGetServiceSectionQuery();
     const [updateServicePageSettings, { isLoading }] = useUpdateServicePageSettingsMutation();
 
     const form = useForm<FormValues>({
@@ -44,6 +45,19 @@ export default function ServicePageSettingsForm() {
             gradientText: "",
         },
     });
+
+    React.useEffect(() => {
+        if (servicePageData?.data) {
+            const { servicePageTitle, servicePageDescription, servicePageNormalText, servicePageGradientText, servicePageImg } = servicePageData.data;
+            form.setValue("title", servicePageTitle || "");
+            form.setValue("description", servicePageDescription || "");
+            form.setValue("normalText", servicePageNormalText || "");
+            form.setValue("gradientText", servicePageGradientText || "");
+            if (servicePageImg) {
+                setPreviewUrl(servicePageImg);
+            }
+        }
+    }, [servicePageData, form]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
