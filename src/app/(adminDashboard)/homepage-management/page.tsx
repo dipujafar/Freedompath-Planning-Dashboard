@@ -34,8 +34,8 @@ const items: TabsProps["items"] = [
     },
     {
         key: "6",
-        label: "Learn & Grow Section",
-        children: <CommonSectionForm sectionName="Learn & Grow Section" />,
+        label: "Book Section",
+        children: <CommonSectionForm sectionName="Book Section" />,
     },
     {
         key: "7",
