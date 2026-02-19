@@ -169,7 +169,6 @@ export default function HeroSectionForm() {
             // 3. Handle Additions and Updates
             const buttonPromises = (values.buttons || []).map((btn, index) => {
                 const btnData = {
-                    key: `button_${index + 1}`,
                     index: index + 1,
                     title: btn.title,
                     link: btn.hyperlink
