@@ -214,9 +214,9 @@ const ToolResources = () => {
                         {togglingId === record.id ? (
                             <span className="inline-block h-[20px] w-[20px] rounded-full border-2 border-gray-400 border-t-transparent animate-spin" />
                         ) : record.isVisible ? (
-                            <EyeOff size={20} color="#F59E0B" />
+                            <Eye size={20} color="#F59E0B" />
                         ) : (
-                            <Eye size={20} color="#9CA3AF" />
+                            <EyeOff size={20} color="#9CA3AF" />
                         )}
                     </button>
 

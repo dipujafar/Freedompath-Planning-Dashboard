@@ -87,7 +87,6 @@ function EditButtonRow({ button, onCancel }: { button: HeroButton; onCancel: () 
             await updateHeroButton({
                 id: button.id,
                 data: {
-                    key: "main",
                     index: button.index,
                     title: values.title,
                     link: values.link,
