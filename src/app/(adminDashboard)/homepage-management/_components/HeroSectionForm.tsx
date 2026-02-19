@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import {
     useAddHeroButtonMutation,
     useDeleteHeroButtonMutation,
+    useGetHeroButtonsQuery,
     useGetHeroSectionQuery,
     useUpdateHeroButtonMutation,
     useUpdateHeroSectionMutation
@@ -53,6 +54,7 @@ export default function HeroSectionForm() {
 
     // API Hooks
     const { data: heroData } = useGetHeroSectionQuery();
+    const { data: heroButtonsData } = useGetHeroButtonsQuery();
     const [updateHeroSection, { isLoading: isUpdatingHero }] = useUpdateHeroSectionMutation();
     const [addHeroButton] = useAddHeroButtonMutation();
     const [updateHeroButton] = useUpdateHeroButtonMutation();
@@ -70,27 +72,47 @@ export default function HeroSectionForm() {
         },
     });
 
-    // Populate form with existing data
+    // Populate hero section fields
     React.useEffect(() => {
         if (heroData?.data) {
-            const { tag, title, subtitle, buttons, floatingCardTitle, floatingCardShortDescription, heroImage } = heroData.data;
+            const {
+                tag,
+                title,
+                subtitle,
+                heroImg,
+                floatingCardTitle,
+                floatingCardShortDescription,
+            } = heroData.data;
+
             form.reset({
                 tag: tag || "",
                 title: title || "",
                 subtitle: subtitle || "",
-                buttons: buttons?.length > 0 ? buttons.map((b: any) => ({
-                    _id: b._id,
-                    title: b.title,
-                    hyperlink: b.link || b.hyperlink || "",
-                })) : [],
+                buttons: [],
                 floatingCardTitle: floatingCardTitle || "",
                 floatingCardDescription: floatingCardShortDescription || "",
             });
-            if (heroImage) {
-                setPreviewUrl(heroImage);
+
+            if (heroImg) {
+                setPreviewUrl(heroImg);
             }
         }
     }, [heroData, form]);
+
+    // Populate buttons from separate API
+    React.useEffect(() => {
+        const buttons = heroButtonsData?.data?.data;
+        if (buttons && buttons.length > 0) {
+            form.setValue(
+                "buttons",
+                buttons.map((b: any) => ({
+                    _id: b.id,
+                    title: b.title,
+                    hyperlink: b.link || "",
+                }))
+            );
+        }
+    }, [heroButtonsData, form]);
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,

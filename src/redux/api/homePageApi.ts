@@ -71,6 +71,10 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        getHeroButtons: build.query<any, void>({
+            query: () => "/hero-buttons",
+            providesTags: [tagTypes.homePage]
+        }),
         addHeroButton: build.mutation<void, any>({
             query: (data) => ({
                 url: "/hero-buttons",
@@ -102,6 +106,7 @@ export { homePageApi };
 
 export const {
     useGetHeroSectionQuery,
+    useGetHeroButtonsQuery,
     useUpdateHeroSectionMutation,
     useUpdateServiceSectionMutation,
     useUpdateServicePageSettingsMutation,
