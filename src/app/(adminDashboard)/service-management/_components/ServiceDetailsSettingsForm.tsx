@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useUpdateServiceDetailsIncludedSectionMutation } from "@/redux/api/homePageApi";
+import { useGetServiceDetailsIncludedSectionQuery, useUpdateServiceDetailsIncludedSectionMutation } from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
@@ -34,6 +34,7 @@ interface ServiceDetailsSettingsFormProps {
 
 export default function ServiceDetailsSettingsForm({ sectionName = "What's Included Section" }: ServiceDetailsSettingsFormProps) {
     const [updateServiceDetailsIncludedSection, { isLoading }] = useUpdateServiceDetailsIncludedSectionMutation();
+    const { data: includedSectionData } = useGetServiceDetailsIncludedSectionQuery();
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -43,6 +44,15 @@ export default function ServiceDetailsSettingsForm({ sectionName = "What's Inclu
             subTitle: "",
         },
     });
+
+    React.useEffect(() => {
+        if (includedSectionData?.data) {
+            const { tag, title, subTitle } = includedSectionData.data;
+            form.setValue("tag", tag || "");
+            form.setValue("title", title || "");
+            form.setValue("subTitle", subTitle || "");
+        }
+    }, [includedSectionData, form]);
 
     const onSubmit = async (values: FormValues) => {
         const payload = {

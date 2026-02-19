@@ -130,6 +130,10 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        getServiceDetailsIncludedSection: build.query<any, void>({
+            query: () => "/homePageContents/service-details-page-whats-included-section",
+            providesTags: [tagTypes.homePage]
+        }),
     }),
     overrideExisting: false,
 });
@@ -157,4 +161,5 @@ export const {
     useDeleteHeroButtonMutation,
     useGetResourcesPageQuery,
     useUpdateResourcesPageMutation,
+    useGetServiceDetailsIncludedSectionQuery,
 } = homePageApi;
