@@ -15,7 +15,7 @@ const items = [
     },
     {
         key: '2',
-        label: 'E-Book Resources',
+        label: 'Book Resources',
         children: <AddEBookResource />,
     }
 ];
