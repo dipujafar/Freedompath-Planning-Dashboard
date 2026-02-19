@@ -24,6 +24,8 @@ const formSchema = z.object({
     title: z.string().min(1, "Page Title is required"),
     description: z.string().min(1, "Page Description is required"),
     gradientText: z.string().min(1, "Gradient text is required"),
+    leftSideTitle: z.string().optional().or(z.literal("")).nullable(),
+    leftSideSubTitle: z.string().optional().or(z.literal("")).nullable(),
     pageImage: z.any().optional(),
 });
 
@@ -47,16 +49,20 @@ export default function PageSettingsForm({ pageName }: PageSettingsFormProps) {
             title: "",
             description: "",
             gradientText: "",
+            leftSideTitle: "",
+            leftSideSubTitle: "",
         },
     });
 
     // Populate form with fetched data
     useEffect(() => {
         if (pageData?.data) {
-            const { title, description, gradientText, image } = pageData.data;
+            const { title, description, gradientText, image, leftSideTitle, leftSideSubTitle } = pageData.data;
             form.setValue("title", title || "");
             form.setValue("description", description || "");
             form.setValue("gradientText", gradientText || "");
+            form.setValue("leftSideTitle", leftSideTitle || "");
+            form.setValue("leftSideSubTitle", leftSideSubTitle || "");
             if (image) {
                 setPreviewUrl(image);
             }
@@ -111,6 +117,8 @@ export default function PageSettingsForm({ pageName }: PageSettingsFormProps) {
             gradientText: values.gradientText,
             title: values.title,
             description: values.description,
+            leftSideTitle: values.leftSideTitle,
+            leftSideSubTitle: values.leftSideSubTitle,
         };
 
         formData.append("data", JSON.stringify(jsonData));
@@ -179,7 +187,7 @@ export default function PageSettingsForm({ pageName }: PageSettingsFormProps) {
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Gradient Text Part */}
                         <FormField
                             control={form.control}
@@ -191,6 +199,48 @@ export default function PageSettingsForm({ pageName }: PageSettingsFormProps) {
                                         <Input
                                             placeholder="e.g. Resources"
                                             {...field}
+                                            className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Left Side Title */}
+                        <FormField
+                            control={form.control}
+                            name="leftSideTitle"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Left Side Title</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Enter Left Side Title"
+                                            value={field.value ?? ""}
+                                            onChange={field.onChange}
+                                            className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+                        {/* Left Side SubTitle */}
+                        <FormField
+                            control={form.control}
+                            name="leftSideSubTitle"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Left Side Subtitle</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Enter Left Side Subtitle"
+                                            value={field.value ?? ""}
+                                            onChange={field.onChange}
                                             className="border border-[#E1E1E1] bg-[#F9FAFB] py-5"
                                         />
                                     </FormControl>
