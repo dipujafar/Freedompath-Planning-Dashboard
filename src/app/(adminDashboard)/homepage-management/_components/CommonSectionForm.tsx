@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
     Form,
     FormControl,
@@ -59,6 +60,11 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
 
     // Determine loading state
     const [isUpdating, setIsUpdating] = useState(false);
+
+    // Testimonial section visibility toggles (design only)
+    const [showOnHomePage, setShowOnHomePage] = useState(false);
+    const [showOnAboutUs, setShowOnAboutUs] = useState(false);
+    const [showOnServices, setShowOnServices] = useState(false);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -194,6 +200,56 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
                             </FormItem>
                         )}
                     />
+
+                    {/* Testimonial Visibility Toggles */}
+                    {sectionName === "Testimonial Section" && (
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-2 mb-1">
+                                <Globe className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm font-semibold text-gray-700">Page Visibility</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-3">
+                                Control which pages display the Testimonial section.
+                            </p>
+                            <div className="grid grid-cols-1 gap-3">
+                                {/* Home Page */}
+                                <div className="flex items-center justify-between p-4 rounded-lg border border-[#E1E1E1] bg-[#F9FAFB]">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800">Show on Home Page</p>
+                                        <p className="text-xs text-muted-foreground">Display testimonials on the main landing page</p>
+                                    </div>
+                                    <Switch
+                                        checked={showOnHomePage}
+                                        onCheckedChange={setShowOnHomePage}
+                                    />
+                                </div>
+
+                                {/* About Us Page */}
+                                <div className="flex items-center justify-between p-4 rounded-lg border border-[#E1E1E1] bg-[#F9FAFB]">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800">Show on About Us Page</p>
+                                        <p className="text-xs text-muted-foreground">Display testimonials on the About Us page</p>
+                                    </div>
+                                    <Switch
+                                        checked={showOnAboutUs}
+                                        onCheckedChange={setShowOnAboutUs}
+                                    />
+                                </div>
+
+                                {/* Services Page */}
+                                <div className="flex items-center justify-between p-4 rounded-lg border border-[#E1E1E1] bg-[#F9FAFB]">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-800">Show on Services Page</p>
+                                        <p className="text-xs text-muted-foreground">Display testimonials on the Services page</p>
+                                    </div>
+                                    <Switch
+                                        checked={showOnServices}
+                                        onCheckedChange={setShowOnServices}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <Button
                         type="submit"
