@@ -45,6 +45,11 @@ export const navLinks = [
     label: <Link href={"/ebook-download"}>Book Download</Link>,
   },
   {
+    key: "ebook-resources-download",
+    icon: <FileDown size={18} />,
+    label: <Link href={"/ebook-resources-download"}>Ebook Download</Link>,
+  },
+  {
     key: "book-management",
     icon: <BookOpenText size={18} />,
     label: <Link href={"/book-management"}>Book Management</Link>,

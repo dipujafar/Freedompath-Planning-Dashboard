@@ -26,6 +26,7 @@ export const tagTypes = {
   footerSection: "FooterSection",
   homePage: "HomePage",
   contactUs: "ContactUs",
+  downloadBookResources: "DownloadBookResources",
 
 };
 
@@ -55,6 +56,7 @@ export const tagTypesList = [
   tagTypes.footerSection,
   tagTypes.homePage,
   tagTypes.contactUs,
+  tagTypes.downloadBookResources,
 ];
 
 
