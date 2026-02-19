@@ -1,15 +1,17 @@
 "use client";
 
-import { Image as AntImage, TableProps, Spin } from "antd";
+import { Image as AntImage, TableProps, Spin, Popconfirm } from "antd";
 import Image from "next/image";
 import DataTable from "@/utils/DataTable";
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import pdf_image from "@/assets/image/pdf_image.png";
-import { useGetBooksQuery } from "@/redux/api/booksApi";
+import { useGetBooksQuery, useDeleteBookMutation } from "@/redux/api/booksApi";
 import { IBook } from "@/types/book.types";
 import dayjs from "dayjs";
+import { useState } from "react";
+import { toast } from "sonner";
 
 type TDataType = {
     key: string;
@@ -26,6 +28,20 @@ type TDataType = {
 const BookManagementTable = () => {
     const router = useRouter();
     const { data: booksData, isLoading, isError } = useGetBooksQuery();
+    const [deleteBook] = useDeleteBookMutation();
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const handleDelete = async (id: string) => {
+        setDeletingId(id);
+        try {
+            await deleteBook(id).unwrap();
+            toast.success("Book deleted successfully!");
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to delete book");
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     // Transform API data to table format
     const tableData: TDataType[] =
@@ -124,6 +140,24 @@ const BookManagementTable = () => {
                         onClick={() => router.push(`/book-management/edit/${record.id}`)}
                         className="cursor-pointer hover:opacity-70 transition-opacity"
                     />
+                    <Popconfirm
+                        title="Delete Book"
+                        description="Are you sure you want to delete this book? This action cannot be undone."
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Yes, Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                    >
+                        {deletingId === record.id ? (
+                            <span className="inline-block h-[18px] w-[18px] rounded-full border-2 border-red-400 border-t-transparent animate-spin" />
+                        ) : (
+                            <Trash2
+                                size={20}
+                                color="#EF4444"
+                                className="cursor-pointer hover:opacity-70 transition-opacity"
+                            />
+                        )}
+                    </Popconfirm>
                 </div>
             ),
         },
