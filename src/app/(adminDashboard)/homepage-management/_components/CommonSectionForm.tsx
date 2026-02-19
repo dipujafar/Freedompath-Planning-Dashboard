@@ -92,6 +92,13 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
                 title: sectionData.title || "",
                 subTitle: sectionData.subTitle || "",
             });
+
+            // Pre-populate visibility toggles for Testimonial Section
+            if (sectionName === "Testimonial Section") {
+                setShowOnHomePage(sectionData.homePageVisible ?? false);
+                setShowOnAboutUs(sectionData.aboutPageVisible ?? false);
+                setShowOnServices(sectionData.servicePageVisible ?? false);
+            }
         }
     }, [
         sectionName,
@@ -124,7 +131,13 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
                 await updateLearnAndGrowSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else if (sectionName === "Testimonial Section") {
-                await updateTestimonialSection(payload).unwrap();
+                const testimonialPayload = {
+                    ...payload,
+                    homePageVisible: showOnHomePage,
+                    aboutPageVisible: showOnAboutUs,
+                    servicePageVisible: showOnServices,
+                };
+                await updateTestimonialSection(testimonialPayload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else {
                 toast.info(`${sectionName} API not implemented yet`);
