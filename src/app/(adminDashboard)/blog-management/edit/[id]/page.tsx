@@ -99,13 +99,13 @@ const EditBlogPage = () => {
 
         const jsonData: {
             title: string;
-            subTitle: string;
+            subTitle?: string;
             details: string;
             isVisible: boolean;
             image?: string;
         } = {
             title: data.title,
-            subTitle: data.subTitle,
+            subTitle: data.subTitle ?? "",
             details: data.details,
             isVisible: data.isVisible,
         };
