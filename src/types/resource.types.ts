@@ -5,6 +5,7 @@ export interface IToolResource {
     name: string;
     details: string;
     link: string;
+    isVisible: boolean;
     isDeleted: boolean;
     createdAt: string;
     updatedAt: string;

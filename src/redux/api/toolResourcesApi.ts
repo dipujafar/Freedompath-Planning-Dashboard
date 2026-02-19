@@ -8,9 +8,10 @@ import { baseApi } from "./baseApi";
 
 // Type for creating/updating tool resource
 interface IToolResourcePayload {
-    name: string;
-    details: string;
-    link: string;
+    name?: string;
+    details?: string;
+    link?: string;
+    isVisible?: boolean;
 }
 
 const toolResourcesApi = baseApi.injectEndpoints({
