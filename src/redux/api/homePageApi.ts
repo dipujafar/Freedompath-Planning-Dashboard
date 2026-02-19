@@ -23,6 +23,26 @@ const homePageApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: [tagTypes.homePage]
         }),
+        getServiceSection: build.query<any, void>({
+            query: () => "/homePageContents/service-section",
+            providesTags: [tagTypes.homePage]
+        }),
+        getBlogSection: build.query<any, void>({
+            query: () => "/homePageContents/service-details-page-blog-section",
+            providesTags: [tagTypes.homePage]
+        }),
+        getResourceSection: build.query<any, void>({
+            query: () => "/homePageContents/resources-section",
+            providesTags: [tagTypes.homePage]
+        }),
+        getLearnAndGrowSection: build.query<any, void>({
+            query: () => "/homePageContents/learn-and-grow-with-our-books-section",
+            providesTags: [tagTypes.homePage]
+        }),
+        getTestimonialSection: build.query<any, void>({
+            query: () => "/homePageContents/testimonial-section",
+            providesTags: [tagTypes.homePage]
+        }),
         updateServicePageSettings: build.mutation<void, FormData>({
             query: (data) => ({
                 url: "/homePageContents/service-section",
@@ -109,6 +129,11 @@ export const {
     useGetHeroButtonsQuery,
     useUpdateHeroSectionMutation,
     useUpdateServiceSectionMutation,
+    useGetServiceSectionQuery,
+    useGetBlogSectionQuery,
+    useGetResourceSectionQuery,
+    useGetLearnAndGrowSectionQuery,
+    useGetTestimonialSectionQuery,
     useUpdateServicePageSettingsMutation,
     useUpdateServiceDetailsIncludedSectionMutation,
     useUpdateBlogSectionMutation,

@@ -17,7 +17,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { useUpdateServiceSectionMutation, useUpdateBlogSectionMutation, useUpdateResourceSectionMutation, useUpdateLearnAndGrowSectionMutation, useUpdateTestimonialSectionMutation } from "@/redux/api/homePageApi";
+import {
+    useUpdateServiceSectionMutation,
+    useUpdateBlogSectionMutation,
+    useUpdateResourceSectionMutation,
+    useUpdateLearnAndGrowSectionMutation,
+    useUpdateTestimonialSectionMutation,
+    useGetServiceSectionQuery,
+    useGetBlogSectionQuery,
+    useGetResourceSectionQuery,
+    useGetLearnAndGrowSectionQuery,
+    useGetTestimonialSectionQuery,
+} from "@/redux/api/homePageApi";
 
 // Define the validation schema
 const formSchema = z.object({
@@ -39,6 +50,13 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
     const [updateLearnAndGrowSection] = useUpdateLearnAndGrowSectionMutation();
     const [updateTestimonialSection] = useUpdateTestimonialSectionMutation();
 
+    // Fetch all sections (RTK Query won't fire unless the hook is actually used)
+    const { data: serviceSectionData } = useGetServiceSectionQuery(undefined, { skip: sectionName !== "Service Section" });
+    const { data: blogSectionData } = useGetBlogSectionQuery(undefined, { skip: sectionName !== "Blog Section" });
+    const { data: resourceSectionData } = useGetResourceSectionQuery(undefined, { skip: sectionName !== "Resource Section" });
+    const { data: learnAndGrowSectionData } = useGetLearnAndGrowSectionQuery(undefined, { skip: sectionName !== "Learn & Grow Section" });
+    const { data: testimonialSectionData } = useGetTestimonialSectionQuery(undefined, { skip: sectionName !== "Testimonial Section" });
+
     // Determine loading state
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -51,6 +69,34 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
         },
     });
 
+    // Populate form based on active section
+    React.useEffect(() => {
+        const dataMap: Record<string, any> = {
+            "Service Section": serviceSectionData?.data,
+            "Blog Section": blogSectionData?.data,
+            "Resource Section": resourceSectionData?.data,
+            "Learn & Grow Section": learnAndGrowSectionData?.data,
+            "Testimonial Section": testimonialSectionData?.data,
+        };
+
+        const sectionData = dataMap[sectionName];
+        if (sectionData) {
+            form.reset({
+                tag: sectionData.tag || "",
+                title: sectionData.title || "",
+                subTitle: sectionData.subTitle || "",
+            });
+        }
+    }, [
+        sectionName,
+        serviceSectionData,
+        blogSectionData,
+        resourceSectionData,
+        learnAndGrowSectionData,
+        testimonialSectionData,
+        form,
+    ]);
+
     const onSubmit = async (values: FormValues) => {
         setIsUpdating(true);
         const payload = {
@@ -60,7 +106,7 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
 
         try {
             if (sectionName === "Service Section") {
-                await updateServiceSection(values).unwrap();
+                await updateServiceSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else if (sectionName === "Blog Section") {
                 await updateBlogSection(payload).unwrap();
@@ -75,7 +121,6 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
                 await updateTestimonialSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else {
-                // Placeholder for other sections
                 toast.info(`${sectionName} API not implemented yet`);
                 console.log(`${sectionName} Values:`, values);
             }
