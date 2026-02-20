@@ -99,9 +99,10 @@ const ToolResourceDetailPage = () => {
                         <label className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                             Details
                         </label>
-                        <p className="text-base text-foreground mt-3 leading-relaxed">
-                            {resource.details}
-                        </p>
+                        <div
+                            className="text-base text-foreground mt-3 leading-relaxed"
+                            dangerouslySetInnerHTML={{ __html: resource.details }}
+                        />
                     </div>
 
                     {/* Resource Link Card */}
@@ -168,8 +169,8 @@ const ToolResourceDetailPage = () => {
                         <div className="mt-3">
                             <span
                                 className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${resource.isDeleted
-                                        ? "bg-red-100 text-red-700"
-                                        : "bg-green-100 text-green-700"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-green-100 text-green-700"
                                     }`}
                             >
                                 <span
