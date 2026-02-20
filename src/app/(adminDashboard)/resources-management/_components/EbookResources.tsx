@@ -61,9 +61,8 @@ const EbookResources = () => {
         {
             title: "Book Name",
             dataIndex: "name",
-            align: "center",
             render: (text: string, record) => (
-                <div className="flex justify-center items-center gap-x-2">
+                <div className="flex justify-start items-center gap-x-2">
                     <AntImage
                         src={record.image || "/book_image.png"}
                         alt="e-book_image"

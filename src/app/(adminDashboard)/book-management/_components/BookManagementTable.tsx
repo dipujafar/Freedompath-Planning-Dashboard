@@ -61,9 +61,8 @@ const BookManagementTable = () => {
         {
             title: "Book Name",
             dataIndex: "name",
-            align: "center",
             render: (text: string, record) => (
-                <div className="flex justify-center items-center gap-x-2">
+                <div className="flex justify-start items-center gap-x-2">
                     <AntImage
                         src={record.image || "/book.png"}
                         alt="book_image"
@@ -72,7 +71,7 @@ const BookManagementTable = () => {
                         className="object-cover rounded-2xl"
                         fallback="/book.png"
                     />
-                    <p className="font-medium">{text}</p>
+                    <p className="font-medium max-w-[200px] truncate" title={text}>{text}</p>
                 </div>
             ),
         },
@@ -80,9 +79,11 @@ const BookManagementTable = () => {
             title: "Book Details",
             dataIndex: "details",
             render: (text: string) => (
-                <p className="max-w-[300px] truncate" dangerouslySetInnerHTML={{
-                    __html: text
-                }} title={text}></p>
+                <div
+                    className="max-w-[400px] line-clamp-2 text-sm text-gray-600"
+                    dangerouslySetInnerHTML={{ __html: text }}
+                    title={text?.replace(/<[^>]*>?/gm, '')}
+                ></div>
             ),
         },
         {

@@ -24,15 +24,15 @@ const DataTable = ({
       dataSource={data}
       loading={isLoading}
       pagination={
-       ( pageSize && total! > pageSize)
+        pageSize
           ? {
-              pageSize,
-              defaultCurrent: Number(page) || 1,
-              total: total ?? data?.length,
-              onChange: (page) => {
-                updateParams({ page: page.toString()});
-              },
-            }
+            pageSize,
+            defaultCurrent: Number(page) || 1,
+            total: total ?? data?.length,
+            onChange: (page) => {
+              updateParams({ page: page.toString() });
+            },
+          }
           : false
       }
       scroll={{ x: "max-content" }}

@@ -83,8 +83,9 @@ const AssociatesTable = () => {
             dataIndex: "bio",
             render: (text: string) => (
                 <div
-                    className="max-w-[500px] truncate-3-lines"
+                    className="max-w-[500px] line-clamp-2 text-sm text-gray-600"
                     dangerouslySetInnerHTML={{ __html: text }}
+                    title={text?.replace(/<[^>]*>?/gm, '')}
                 />
             ),
         },
