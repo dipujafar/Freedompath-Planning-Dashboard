@@ -1,15 +1,16 @@
 "use client";
 
-import { Image as AntImage, TableProps, Spin } from "antd";
+import { Image as AntImage, TableProps, Spin, Popconfirm } from "antd";
 import Image from "next/image";
 import DataTable from "@/utils/DataTable";
-import { Eye, Pencil } from "lucide-react";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import pdf_image from "@/assets/image/pdf_image.png";
-import { useGetBookResourcesQuery } from "@/redux/api/bookResourcesApi";
+import { useGetBookResourcesQuery, useDeleteBookResourceMutation } from "@/redux/api/bookResourcesApi";
 import { IBookResource } from "@/types/resource.types";
 import dayjs from "dayjs";
+import { toast } from "sonner";
 
 type TDataType = {
     key: string;
@@ -32,6 +33,16 @@ const EbookResources = () => {
         page,
         limit,
     });
+    const [deleteBookResource] = useDeleteBookResourceMutation();
+
+    const handleDelete = async (id: string) => {
+        try {
+            await deleteBookResource(id).unwrap();
+            toast.success("Resource deleted successfully");
+        } catch (error: any) {
+            toast.error(error.data.message || "Failed to delete resource");
+        }
+    };
 
     // Transform API data to table format
     const tableData: TDataType[] =
@@ -115,6 +126,19 @@ const EbookResources = () => {
                         onClick={() => router.push(`/resources-management/edit-book/${record.id}`)}
                         className="cursor-pointer hover:opacity-70 transition-opacity"
                     />
+                    <Popconfirm
+                        title="Delete this resource?"
+                        description="Are you sure to delete this resource?"
+                        onConfirm={() => handleDelete(record.id)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Trash2
+                            size={20}
+                            color="#ff4d4f"
+                            className="cursor-pointer hover:opacity-70 transition-opacity"
+                        />
+                    </Popconfirm>
                 </div>
             ),
         },
