@@ -55,7 +55,7 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
     const { data: serviceSectionData } = useGetServiceSectionQuery(undefined, { skip: sectionName !== "Service Section" });
     const { data: blogSectionData } = useGetBlogSectionQuery(undefined, { skip: sectionName !== "Blog Section" });
     const { data: resourceSectionData } = useGetResourceSectionQuery(undefined, { skip: sectionName !== "Resource Section" });
-    const { data: learnAndGrowSectionData } = useGetLearnAndGrowSectionQuery(undefined, { skip: sectionName !== "Learn & Grow Section" });
+    const { data: learnAndGrowSectionData } = useGetLearnAndGrowSectionQuery(undefined, { skip: sectionName !== "Book Section" });
     const { data: testimonialSectionData } = useGetTestimonialSectionQuery(undefined, { skip: sectionName !== "Testimonial Section" });
 
     // Determine loading state
@@ -81,7 +81,7 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
             "Service Section": serviceSectionData?.data,
             "Blog Section": blogSectionData?.data,
             "Resource Section": resourceSectionData?.data,
-            "Learn & Grow Section": learnAndGrowSectionData?.data,
+            "Book Section": learnAndGrowSectionData?.data,
             "Testimonial Section": testimonialSectionData?.data,
         };
 
@@ -127,7 +127,7 @@ export default function CommonSectionForm({ sectionName }: CommonSectionFormProp
             } else if (sectionName === "Resource Section") {
                 await updateResourceSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
-            } else if (sectionName === "Learn & Grow Section") {
+            } else if (sectionName === "Book Section") {
                 await updateLearnAndGrowSection(payload).unwrap();
                 toast.success(`${sectionName} updated successfully!`);
             } else if (sectionName === "Testimonial Section") {
