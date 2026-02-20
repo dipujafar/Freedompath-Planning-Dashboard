@@ -51,7 +51,6 @@ const bookResourcesApi = baseApi.injectEndpoints({
             invalidatesTags: [tagTypes.bookResources],
         }),
 
-        // Update book resource
         updateBookResource: build.mutation<
             ISingleBookResourceResponse,
             { id: string; formData: FormData }
@@ -66,6 +65,15 @@ const bookResourcesApi = baseApi.injectEndpoints({
                 { type: tagTypes.bookResources, id },
             ],
         }),
+
+        // Delete book resource
+        deleteBookResource: build.mutation<void, string>({
+            query: (id) => ({
+                url: `/book-resources/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: [tagTypes.bookResources],
+        }),
     }),
 });
 
@@ -74,5 +82,6 @@ export const {
     useGetSingleBookResourceQuery,
     useCreateBookResourceMutation,
     useUpdateBookResourceMutation,
+    useDeleteBookResourceMutation,
 } = bookResourcesApi;
 
