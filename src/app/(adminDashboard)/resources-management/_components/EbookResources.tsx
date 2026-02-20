@@ -4,7 +4,7 @@ import { Image as AntImage, TableProps, Spin } from "antd";
 import Image from "next/image";
 import DataTable from "@/utils/DataTable";
 import { Eye, Pencil } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import pdf_image from "@/assets/image/pdf_image.png";
 import { useGetBookResourcesQuery } from "@/redux/api/bookResourcesApi";
@@ -24,14 +24,21 @@ type TDataType = {
 
 const EbookResources = () => {
     const router = useRouter();
-    const { data: bookResourcesData, isLoading, isError } = useGetBookResourcesQuery();
+    const searchParams = useSearchParams();
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 10;
+
+    const { data: bookResourcesData, isLoading, isError } = useGetBookResourcesQuery({
+        page,
+        limit,
+    });
 
     // Transform API data to table format
     const tableData: TDataType[] =
         bookResourcesData?.data?.data?.map((resource: IBookResource, index: number) => ({
             key: resource.id,
             id: resource.id,
-            serial: index + 1,
+            serial: (page - 1) * limit + index + 1,
             name: resource.name,
             details: resource.details,
             image: resource.image,
@@ -129,7 +136,14 @@ const EbookResources = () => {
         );
     }
 
-    return <DataTable columns={columns} data={tableData} pageSize={10} />;
+    return (
+        <DataTable
+            columns={columns}
+            data={tableData}
+            pageSize={limit}
+            total={bookResourcesData?.data?.meta?.total}
+        />
+    );
 };
 
 export default EbookResources;
