@@ -15,7 +15,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import RichTextEditor from "@/components/shared/RichTextEditor";
 import { useRouter, useParams } from "next/navigation";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
@@ -25,6 +24,8 @@ import {
 } from "@/redux/api/associatesApi";
 import { toast } from "sonner";
 import { Spin } from "antd";
+import { capitalizeParagraphs, sanitizeAllHTML } from "@/utils/sanitizeHTML";
+
 
 const formSchema = z.object({
     name: z.string().min(1, "Associate name is required"),
@@ -86,13 +87,14 @@ const EditAssociatePage = () => {
         // Build data object - include photo URL if no new file uploaded
         const data: { name: string; bio: string; photo?: string } = {
             name: values.name,
-            bio: values.bio,
+            bio: sanitizeAllHTML(values.bio),
         };
 
         // If no new photo file, include the existing photo URL in data
         if (!photoFile && existingPhoto) {
             data.photo = existingPhoto;
         }
+
 
         formData.append("data", JSON.stringify(data));
 
