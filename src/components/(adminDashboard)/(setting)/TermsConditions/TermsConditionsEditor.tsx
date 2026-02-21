@@ -14,6 +14,7 @@ import { toast } from "sonner";
 
 // Dynamically import ReactQuill with SSR disabled
 import RichTextEditor from "@/components/shared/RichTextEditor";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const TermsConditionsEditor = () => {
   const [value, setValue] = useState("");
@@ -34,7 +35,7 @@ const TermsConditionsEditor = () => {
   const handleSave = async () => {
     try {
       const result = await updateContents({
-        termsAndCondition: value,
+        termsAndCondition: sanitizeAllHTML(value),
       }).unwrap();
 
       if (result.success) {

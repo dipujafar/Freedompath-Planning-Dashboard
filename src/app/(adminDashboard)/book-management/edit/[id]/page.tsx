@@ -25,6 +25,7 @@ import {
 } from "@/redux/api/booksApi";
 import { toast } from "sonner";
 import { Spin } from "antd";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const bookSchema = z.object({
     name: z
@@ -134,7 +135,7 @@ const EditBookPage = () => {
         } = {
             name: data.name,
             price: Number(data.price),
-            details: data.details,
+            details: sanitizeAllHTML(data.details),
             url: data.url,
         };
 

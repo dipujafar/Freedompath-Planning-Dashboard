@@ -15,7 +15,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import RichTextEditor from "@/components/shared/RichTextEditor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -28,6 +27,7 @@ import {
   useGetAboutSteveDerayQuery,
   useUpdateAboutSteveDerayMutation,
 } from "@/redux/api/aboutManagementApi";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 // API IDs - These should be stored in env or config
 const HERO_SECTION_ID = "694b79819aa607a9f5031ded";
@@ -216,7 +216,7 @@ export function AboutUsForm() {
       projects: parseInt(values.projectsCompleted),
       experience: parseInt(values.yearsExperience),
       clientReview: parseInt(values.clientReview),
-      description: values.heroDescription,
+      description: sanitizeAllHTML(values.heroDescription),
     };
 
     formData.append("data", JSON.stringify(data));
@@ -274,9 +274,8 @@ export function AboutUsForm() {
     const formData = new FormData();
 
     const data = {
-
       title: values.businessOwnerTitle,
-      bio: values.businessOwnerBio,
+      bio: sanitizeAllHTML(values.businessOwnerBio),
       sectionTitle: values.sectionTitle
     };
 

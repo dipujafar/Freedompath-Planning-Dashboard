@@ -26,6 +26,7 @@ import {
 } from "@/redux/api/blogsApi";
 import { toast } from "sonner";
 import { Spin } from "antd";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const blogSchema = z.object({
     title: z
@@ -106,7 +107,7 @@ const EditBlogPage = () => {
         } = {
             title: data.title,
             subTitle: data.subTitle ?? "",
-            details: data.details,
+            details: sanitizeAllHTML(data.details),
             isVisible: data.isVisible,
         };
 

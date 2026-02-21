@@ -1,5 +1,4 @@
 "use client";
-
 import type React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -16,12 +15,12 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import RichTextEditor from "@/components/shared/RichTextEditor";
 import { useRouter } from "next/navigation";
 import { FileUpload } from "@/app/(adminDashboard)/service-management/add-service/_components/FileUpload";
 import { useCreateAssociateMutation } from "@/redux/api/associatesApi";
 import { toast } from "sonner";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const formSchema = z.object({
     name: z.string().min(1, "Associate name is required"),
@@ -61,7 +60,7 @@ export function AddAssociatesForm() {
 
         const data = {
             name: values.name,
-            bio: values.bio,
+            bio: sanitizeAllHTML(values.bio),
         };
 
         formData.append("data", JSON.stringify(data));

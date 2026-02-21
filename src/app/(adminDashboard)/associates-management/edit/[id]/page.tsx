@@ -1,5 +1,4 @@
 "use client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -24,7 +23,7 @@ import {
 } from "@/redux/api/associatesApi";
 import { toast } from "sonner";
 import { Spin } from "antd";
-import { capitalizeParagraphs, sanitizeAllHTML } from "@/utils/sanitizeHTML";
+import {sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 
 const formSchema = z.object({

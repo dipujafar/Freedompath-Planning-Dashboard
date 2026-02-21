@@ -26,6 +26,7 @@ import {
 import { toast } from "sonner";
 import { ITestimonial } from "@/types/testimonial.types";
 import RichTextEditor from "@/components/shared/RichTextEditor";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const formSchema = z.object({
     clientName: z.string().min(1, "Client name is required"),
@@ -136,7 +137,7 @@ export function TestimonialForm({
         } = {
             clientName: values.clientName,
             designation: values.designation,
-            description: values.description,
+            description: sanitizeAllHTML(values.description),
             rating: values.rating,
             isVisible: values.isVisible,
         };

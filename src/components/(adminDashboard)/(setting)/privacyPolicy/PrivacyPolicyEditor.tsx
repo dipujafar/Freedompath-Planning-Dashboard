@@ -1,19 +1,16 @@
 "use client";
-
 import { Button, Spin } from "antd";
 import dynamic from "next/dynamic";
-
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-
 import {
   useGetContentsQuery,
   useUpdateContentsMutation,
 } from "@/redux/api/contentsApi";
 import { toast } from "sonner";
-
 // Dynamically import ReactQuill with SSR disabled
 import RichTextEditor from "@/components/shared/RichTextEditor";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const PrivacyPolicyEditor = () => {
   const [value, setValue] = useState("");
@@ -34,7 +31,7 @@ const PrivacyPolicyEditor = () => {
   const handleSave = async () => {
     try {
       const result = await updateContents({
-        privacyPolicy: value,
+        privacyPolicy: sanitizeAllHTML(value),
       }).unwrap();
 
       if (result.success) {

@@ -21,6 +21,7 @@ import { FileUpload } from "@/app/(adminDashboard)/service-management/add-servic
 import { useRouter } from "next/navigation";
 import { useCreateBookMutation } from "@/redux/api/booksApi";
 import { toast } from "sonner";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const bookSchema = z.object({
     name: z
@@ -86,7 +87,7 @@ const AddBookForm = () => {
         const jsonData = {
             name: data.name,
             price: Number(data.price),
-            details: data.details,
+            details: sanitizeAllHTML(data.details),
             url: data.url,
         };
 

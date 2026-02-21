@@ -1,5 +1,4 @@
 "use client";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -14,7 +13,6 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import RichTextEditor from "@/components/shared/RichTextEditor";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -22,6 +20,7 @@ import { FileUpload } from "@/app/(adminDashboard)/service-management/add-servic
 import { useRouter } from "next/navigation";
 import { useCreateBlogMutation } from "@/redux/api/blogsApi";
 import { toast } from "sonner";
+import { sanitizeAllHTML } from "@/utils/sanitizeHTML";
 
 const blogSchema = z.object({
     title: z
@@ -64,7 +63,7 @@ const AddBlogForm = () => {
         const jsonData = {
             title: data.title,
             subTitle: data.subTitle,
-            details: data.details,
+            details: sanitizeAllHTML(data.details),
             isVisible: data.isVisible,
         };
 
@@ -73,7 +72,6 @@ const AddBlogForm = () => {
         if (imageFile) {
             formData.append("image", imageFile);
         }
-
         try {
             const result = await createBlog(formData).unwrap();
 
